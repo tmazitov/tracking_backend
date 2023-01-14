@@ -1,0 +1,18 @@
+{
+    "startAt": "2011-10-05T14:48:00.000Z",
+    "endAt": "2011-10-05T14:48:00.000Z",
+    "points" : [
+        {
+            "title": "Example",
+            "lat": 55.7887,
+            "lon": 49.1221
+        },
+        {
+            "title": "Another one",
+            "lat": 55.7866,
+            "lon": 49.1200
+        }
+    ],
+    "helpers": 2,
+    "comment": "Awesome comment"
+}

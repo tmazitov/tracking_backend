@@ -1,22 +1,28 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+)
 
 type Router struct {
-	core *gin.Engine
+	core        *gin.Engine
+	servicePath string
 }
 
-func NewRouter() *Router {
+func NewRouter(servicePath string) *Router {
 	r := gin.Default()
-	return &Router{core: r}
+	return &Router{core: r, servicePath: servicePath}
 }
 
 func (r *Router) Setup(endpoints []Endpoint) {
 	for _, endpoint := range endpoints {
-		r.core.Handle(endpoint.Method, endpoint.Path, endpoint.Handler.Action)
+		fmt.Printf("Setup endpoint: %s | %s \n", endpoint.Method, r.servicePath+endpoint.Path)
+		r.core.Handle(endpoint.Method, r.servicePath+endpoint.Path, endpoint.Handler.Handle)
 	}
 }
 
 func (r *Router) Run(port string) {
-	r.core.Run()
+	r.core.Run(":" + port)
 }

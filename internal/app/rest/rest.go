@@ -1,9 +1,40 @@
 package rest
 
 import (
-	"internal/core/router"
+	bl "github.com/tmazitov/tracking_backend.git/internal/app/bl"
+	router "github.com/tmazitov/tracking_backend.git/internal/core/router"
 )
 
-func NewRouter(port string) {
-	return router.NewRouter(port)
+type Router struct {
+	core        *router.Router
+	storage     bl.Storage
+	servicePath string
+}
+
+func NewRouter(servicePath string, storage bl.Storage) Router {
+	core := router.NewRouter(servicePath)
+
+	r := Router{
+		core:        core,
+		storage:     storage,
+		servicePath: servicePath,
+	}
+
+	r.Setup()
+
+	return r
+}
+
+func (r *Router) Endpoints() []router.Endpoint {
+	return []router.Endpoint{
+		{Method: "POST", Path: "/order", Handler: &AddOrderHandler{Storage: r.storage}},
+	}
+}
+
+func (r *Router) Setup() {
+	r.core.Setup(r.Endpoints())
+}
+
+func (r *Router) Run(port string) {
+	r.core.Run(port)
 }
