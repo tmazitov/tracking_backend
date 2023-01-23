@@ -17,11 +17,12 @@ func (s *Storage) InsertPoint(points []bl.Point) ([]int64, error) {
 
 	defer s.gis.Close()
 
-	execString := "insert into points (title, point) values"
+	execString := "insert into points (title, floor, point) values"
 	values := ""
 
 	for index, point := range points {
-		values += fmt.Sprintf("('%s', 'SRID=4326;POINT(%g %g)')", point.Title, point.Longitude, point.Latitude)
+		values += fmt.Sprintf("('%s', '%d', 'SRID=4326;POINT(%g %g)')", point.Title, point.Floor, point.Longitude, point.Latitude)
+
 		if index != len(points)-1 {
 			values += ", "
 		}

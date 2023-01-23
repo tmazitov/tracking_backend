@@ -4,11 +4,13 @@
     "points" : [
         {
             "title": "Example",
+            "floor": 3,
             "lat": 55.7887,
             "lon": 49.1221
         },
         {
             "title": "Another one",
+            "floor": 1,
             "lat": 55.7866,
             "lon": 49.1200
         }
