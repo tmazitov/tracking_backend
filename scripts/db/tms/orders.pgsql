@@ -3,12 +3,15 @@ DROP TABLE IF EXISTS orders CASCADE;
 CREATE TABLE orders (
     id              BIGINT GENERATED ALWAYS AS IDENTITY UNIQUE,
     
-    startAt         TIMESTAMP NOT NULL,
-    endAt           TIMESTAMP,
+    start_at         TIMESTAMP NOT NULL,
+    end_at           TIMESTAMP DEFAULT NULL,
 
     points          BIGINT[] NOT NULL,
     helpers         INT NOT NULL DEFAULT 0,
     comment_message VARCHAR(256) NOT NULL DEFAULT '', 
     is_fragile_cargo BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    edited_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY(id)
 );

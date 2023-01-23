@@ -11,7 +11,6 @@ type AddOrderHandler struct {
 	Storage bl.Storage
 	input   struct {
 		StartAt        time.Time  `json:"startAt" validate:"max=32"`
-		EndAt          time.Time  `json:"endAt" validate:"max=32"`
 		Points         []bl.Point `json:"points"`
 		Helpers        uint8      `json:"helpers,omitempty"`
 		Comment        string     `json:"comment,omitempty" validate:"max=256"`
@@ -43,7 +42,6 @@ func (h *AddOrderHandler) Handle(c *gin.Context) {
 
 	newOrder := bl.CreateOrder{
 		StartAt:        h.input.StartAt,
-		EndAt:          h.input.EndAt,
 		PointsID:       pointIDs,
 		Helpers:        h.input.Helpers,
 		Comment:        h.input.Comment,

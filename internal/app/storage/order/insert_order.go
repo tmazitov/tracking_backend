@@ -17,15 +17,14 @@ func (s *Storage) InsertOrder(order bl.CreateOrder) error {
 
 	execString := `insert into orders 
 	(
-		startAt, 
-		endAt, 
+		start_at, 
 		points, 
 		helpers, 
 		comment_message, 
 		is_fragile_cargo
 	) 
-	values ($1, $2, $3, $4, $5, $6)`
-	_, err = conn.Exec(execString, order.StartAt, order.EndAt, pq.Array(order.PointsID), order.Helpers, order.Comment, order.IsFragileCargo)
+	values ($1, $2, $3, $4, $5)`
+	_, err = conn.Exec(execString, order.StartAt, pq.Array(order.PointsID), order.Helpers, order.Comment, order.IsFragileCargo)
 	if err != nil {
 		return errors.New("DB exec error: " + err.Error())
 	}
