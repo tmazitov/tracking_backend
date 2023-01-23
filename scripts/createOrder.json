@@ -15,6 +15,7 @@
             "lon": 49.1200
         }
     ],
+    "isFragileCargo": true,
     "helpers": 2,
     "comment": "Awesome comment"
 }

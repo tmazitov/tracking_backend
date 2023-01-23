@@ -10,11 +10,12 @@ import (
 type AddOrderHandler struct {
 	Storage bl.Storage
 	input   struct {
-		StartAt time.Time  `json:"startAt" validate:"max=32"`
-		EndAt   time.Time  `json:"endAt" validate:"max=32"`
-		Points  []bl.Point `json:"points"`
-		Helpers uint8      `json:"helpers,omitempty"`
-		Comment string     `json:"comment,omitempty" validate:"max=256"`
+		StartAt        time.Time  `json:"startAt" validate:"max=32"`
+		EndAt          time.Time  `json:"endAt" validate:"max=32"`
+		Points         []bl.Point `json:"points"`
+		Helpers        uint8      `json:"helpers,omitempty"`
+		Comment        string     `json:"comment,omitempty" validate:"max=256"`
+		IsFragileCargo bool       `json:"isFragileCargo,omitempty"`
 	}
 	result struct {
 	}
@@ -41,11 +42,12 @@ func (h *AddOrderHandler) Handle(c *gin.Context) {
 	}
 
 	newOrder := bl.CreateOrder{
-		StartAt:  h.input.StartAt,
-		EndAt:    h.input.EndAt,
-		PointsID: pointIDs,
-		Helpers:  h.input.Helpers,
-		Comment:  h.input.Comment,
+		StartAt:        h.input.StartAt,
+		EndAt:          h.input.EndAt,
+		PointsID:       pointIDs,
+		Helpers:        h.input.Helpers,
+		Comment:        h.input.Comment,
+		IsFragileCargo: h.input.IsFragileCargo,
 	}
 	if err = h.Storage.OrderStorage().InsertOrder(newOrder); err != nil {
 		ErrorLog(500, "Internal server error", err, c)

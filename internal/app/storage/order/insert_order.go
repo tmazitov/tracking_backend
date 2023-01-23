@@ -8,10 +8,6 @@ import (
 )
 
 func (s *Storage) InsertOrder(order bl.CreateOrder) error {
-	// startAt time.Time
-	// points  []Point
-	// helpers uint8
-	// comment string
 	conn, err := s.repo.Conn()
 	if err != nil {
 		return errors.New("DB conn error: " + err.Error())
@@ -19,17 +15,17 @@ func (s *Storage) InsertOrder(order bl.CreateOrder) error {
 
 	defer s.repo.Close()
 
-	// points := "{"
-	// for index, pointID := range order.PointsID {
-	// 	points += fmt.Sprintf("%d", pointID)
-	// 	if index != len(order.PointsID)-1 {
-	// 		points += ","
-	// 	}
-	// }
-	// points = points + "}"
-
-	execString := "insert into orders (startAt, endAt, points, helpers, comment_message) values ($1, $2, $3, $4, $5)"
-	_, err = conn.Exec(execString, order.StartAt, order.EndAt, pq.Array(order.PointsID), order.Helpers, order.Comment)
+	execString := `insert into orders 
+	(
+		startAt, 
+		endAt, 
+		points, 
+		helpers, 
+		comment_message, 
+		is_fragile_cargo
+	) 
+	values ($1, $2, $3, $4, $5, $6)`
+	_, err = conn.Exec(execString, order.StartAt, order.EndAt, pq.Array(order.PointsID), order.Helpers, order.Comment, order.IsFragileCargo)
 	if err != nil {
 		return errors.New("DB exec error: " + err.Error())
 	}
