@@ -1,4 +1,4 @@
-package tms
+package aaa
 
 import (
 	"encoding/json"
@@ -34,11 +34,5 @@ func (c *Config) Setup() error {
 func (c *Config) RepoConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"connection_string": fmt.Sprint(c.Data["database_url"]),
-	}
-}
-
-func (c *Config) GisConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"connection_string": fmt.Sprint(c.Data["gis_database_url"]),
 	}
 }

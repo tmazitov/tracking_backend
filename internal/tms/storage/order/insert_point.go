@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/tmazitov/tracking_backend.git/internal/app/bl"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
 func (s *Storage) InsertPoint(points []bl.Point) ([]int64, error) {

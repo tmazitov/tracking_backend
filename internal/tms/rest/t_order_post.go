@@ -4,7 +4,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tmazitov/tracking_backend.git/internal/app/bl"
+	core "github.com/tmazitov/tracking_backend.git/internal/core/request"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
 type AddOrderHandler struct {
@@ -20,23 +21,16 @@ type AddOrderHandler struct {
 	}
 }
 
-func (h *AddOrderHandler) Input() interface{} {
-	return &h.input
-}
-func (h *AddOrderHandler) Result() interface{} {
-	return &h.result
-}
-
 func (h *AddOrderHandler) Handle(c *gin.Context) {
 
 	if err := c.BindJSON(&h.input); err != nil {
-		ErrorLog(400, "Bad request", err, c)
+		core.ErrorLog(400, "Bad request", err, c)
 		return
 	}
 
 	pointIDs, err := h.Storage.OrderStorage().InsertPoint(h.input.Points)
 	if err != nil {
-		ErrorLog(500, "Internal server error", err, c)
+		core.ErrorLog(500, "Internal server error", err, c)
 		return
 	}
 
@@ -48,9 +42,9 @@ func (h *AddOrderHandler) Handle(c *gin.Context) {
 		IsFragileCargo: h.input.IsFragileCargo,
 	}
 	if err = h.Storage.OrderStorage().InsertOrder(newOrder); err != nil {
-		ErrorLog(500, "Internal server error", err, c)
+		core.ErrorLog(500, "Internal server error", err, c)
 		return
 	}
 
-	SendResponse(201, h.result, c)
+	core.SendResponse(201, h.result, c)
 }

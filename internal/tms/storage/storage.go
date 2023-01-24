@@ -3,9 +3,9 @@ package storage
 import (
 	"log"
 
-	"github.com/tmazitov/tracking_backend.git/internal/app/bl"
-	order "github.com/tmazitov/tracking_backend.git/internal/app/storage/order"
 	repo "github.com/tmazitov/tracking_backend.git/internal/core/repo"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
+	order "github.com/tmazitov/tracking_backend.git/internal/tms/storage/order"
 )
 
 type Storage struct {

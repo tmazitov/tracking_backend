@@ -1,8 +1,8 @@
 package rest
 
 import (
-	bl "github.com/tmazitov/tracking_backend.git/internal/app/bl"
-	router "github.com/tmazitov/tracking_backend.git/internal/core/router"
+	bl "github.com/tmazitov/tracking_backend.git/internal/aaa/bl"
+	"github.com/tmazitov/tracking_backend.git/internal/core/router"
 )
 
 type Router struct {
@@ -27,7 +27,7 @@ func NewRouter(servicePath string, storage bl.Storage) Router {
 
 func (r *Router) Endpoints() []router.Endpoint {
 	return []router.Endpoint{
-		{Method: "POST", Path: "/order", Handler: &AddOrderHandler{Storage: r.storage}},
+		{Method: "POST", Path: "/order", Handler: &AuthUser{Storage: r.storage}},
 	}
 }
 
