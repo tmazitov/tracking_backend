@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/tmazitov/tracking_backend.git/internal/core/conductor"
+	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
 )
 
 type Config struct {
@@ -34,5 +38,27 @@ func (c *Config) Setup() error {
 func (c *Config) RepoConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"connection_string": fmt.Sprint(c.Data["database_url"]),
+	}
+}
+
+func (c *Config) CondConfig() conductor.Config {
+	return conductor.Config{
+		Email: fmt.Sprint(c.Data["conductor_email"]),
+		Pass:  fmt.Sprint(c.Data["conductor_pass"]),
+	}
+}
+
+func (c *Config) RedisConfig() *redis.Options {
+	return &redis.Options{
+		Addr:     fmt.Sprint(c.Data["redis_address"]),
+		Password: fmt.Sprint(c.Data["redis_password"]),
+		DB:       0, // use default DB
+	}
+}
+
+func (c *Config) JwtConfig() jwt.JwtConfig {
+	return jwt.JwtConfig{
+		Secret: []byte(fmt.Sprint(c.Data["jwt_secret"])),
+		Salt:   fmt.Sprint(c.Data["jwt_salt"]),
 	}
 }
