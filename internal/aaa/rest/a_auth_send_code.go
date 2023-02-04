@@ -14,7 +14,7 @@ type AuthUserSendCode struct {
 		Email string `json:"email" validate:"max=64"`
 	}
 	result struct {
-		token string
+		Token string
 	}
 }
 
@@ -34,7 +34,7 @@ func (h *AuthUserSendCode) Handle(c *gin.Context) {
 
 	// fmt.Println(exist)
 
-	h.result.token, err = h.Conductor.CreateTicket(c, email)
+	h.result.Token, err = h.Conductor.CreateTicket(c, email)
 
 	if err == conductor.ErrTooManyAttempts {
 		core.ErrorLog(429, "Too many attempts", err, c)
@@ -46,5 +46,5 @@ func (h *AuthUserSendCode) Handle(c *gin.Context) {
 		return
 	}
 
-	core.SendResponse(201, h.result, c)
+	core.SendResponse(200, h.result, c)
 }
