@@ -1,13 +1,13 @@
 package conductor
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
-	"gopkg.in/gomail.v2"
 )
 
 const MAX_ATTEND_COUNT = 6
@@ -22,10 +22,12 @@ func (c *Conductor) CreateTicket(ctx *gin.Context, email string) (string, error)
 
 	// Create ticket message
 	ticketCode := createCode()
+
+	title := fmt.Sprintf("%s - ваш код доступа для сервиса \"Удачные перевозки\"", ticketCode)
 	ticket := ticketMessageTemplate(ticketCode)
 
 	// Send ticket to the email
-	c.emailChan <- emailMessage{Email: email, Ticket: ticket}
+	c.emailChan <- emailMessage{Email: email, Title: title, Ticket: ticket}
 
 	// Create token for ticket
 	token, err := c.jwt.NewCheckToken(&jwt.CheckClaims{
@@ -46,23 +48,6 @@ func (c *Conductor) CreateTicket(ctx *gin.Context, email string) (string, error)
 	c.updateAuthAttempts(ctx, email, attemptCount+1)
 
 	return token, nil
-}
-
-func (c *Conductor) sendToEmail(email string, ticket string) error {
-	msg := gomail.NewMessage()
-	msg.SetHeader("From", c.config.Email)
-	msg.SetHeader("To", email)
-	msg.SetHeader("Subject", "\"Удачные перевозки\" : Код доступа")
-	msg.SetBody("text/html", ticket)
-
-	n := gomail.NewDialer("smtp.gmail.com", 587, c.config.Email, c.config.Pass)
-
-	// Send the email
-	if err := n.DialAndSend(msg); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func ticketMessageTemplate(code string) string {
