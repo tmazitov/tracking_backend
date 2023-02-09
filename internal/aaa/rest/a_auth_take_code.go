@@ -56,5 +56,10 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 	h.result.Access = tokens.Access
 	h.result.Refresh = tokens.Refresh
 
+	if err := h.Conductor.DeleteTicket(ctx, h.input.Token); err != nil {
+		core.ErrorLog(500, "Internal Server error", err, ctx)
+		return
+	}
+
 	core.SendResponse(201, h.result, ctx)
 }

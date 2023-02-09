@@ -14,7 +14,7 @@ type AuthUserSendCode struct {
 		Email string `json:"email" validate:"max=64"`
 	}
 	result struct {
-		Token string
+		Token string `json:"token"`
 	}
 }
 
