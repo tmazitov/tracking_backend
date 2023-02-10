@@ -1,8 +1,6 @@
 package router
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,8 +16,11 @@ func NewRouter(servicePath string) *Router {
 
 func (r *Router) Setup(endpoints []Endpoint) {
 	for _, endpoint := range endpoints {
-		fmt.Printf("Setup endpoint: %s | %s \n", endpoint.Method, r.servicePath+endpoint.Path)
-		r.core.Handle(endpoint.Method, r.servicePath+endpoint.Path, endpoint.Handler.Handle)
+		if endpoint.Middleware != nil {
+			r.core.Handle(endpoint.Method, r.servicePath+endpoint.Path, endpoint.Middleware.Handle(), endpoint.Handler.Handle)
+		} else {
+			r.core.Handle(endpoint.Method, r.servicePath+endpoint.Path, endpoint.Handler.Handle)
+		}
 	}
 }
 

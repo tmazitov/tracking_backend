@@ -29,6 +29,6 @@ func main() {
 
 	storage := storage.NewStorage(store)
 
-	router := rest.NewRouter("/aaa/api", storage, conductor)
+	router := rest.NewRouter("/aaa/api", storage, conductor, jwt)
 	router.Run("5000")
 }

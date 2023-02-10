@@ -45,7 +45,7 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 		return
 	}
 
-	tokens, err := h.Conductor.CreateAccess(ctx, jwt.AccessClaims{
+	tokens, err := h.Conductor.CreateTokenPair(ctx, jwt.AccessClaims{
 		IP: ctx.ClientIP(),
 	})
 	if err != nil {
