@@ -1,7 +1,7 @@
 package order
 
 import (
-	repo "github.com/tmazitov/tracking_backend.git/internal/core/repo"
+	repo "github.com/tmazitov/tracking_backend.git/pkg/repo"
 )
 
 type Storage struct {

@@ -3,12 +3,11 @@ package main
 import (
 	"github.com/redis/go-redis/v9"
 	config "github.com/tmazitov/tracking_backend.git/config/aaa"
-	grpc "github.com/tmazitov/tracking_backend.git/internal/aaa/proto/server"
 	rest "github.com/tmazitov/tracking_backend.git/internal/aaa/rest"
 	storage "github.com/tmazitov/tracking_backend.git/internal/aaa/storage"
-	"github.com/tmazitov/tracking_backend.git/internal/core/conductor"
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
-	"github.com/tmazitov/tracking_backend.git/internal/core/repo"
+	"github.com/tmazitov/tracking_backend.git/pkg/conductor"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
+	"github.com/tmazitov/tracking_backend.git/pkg/repo"
 )
 
 func main() {
@@ -36,7 +35,7 @@ func main() {
 	conductor := conductor.NewConductor(condConf, jwt, redis)
 
 	// Setup GRPC
-	grpc.SetupServer(":5100")
+	// grpc.SetupServer(":5100")
 
 	// Setup router
 	router := rest.NewRouter("/aaa/api", storage, conductor, jwt)

@@ -2,9 +2,9 @@ package rest
 
 import (
 	bl "github.com/tmazitov/tracking_backend.git/internal/aaa/bl"
-	"github.com/tmazitov/tracking_backend.git/internal/core/conductor"
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
-	"github.com/tmazitov/tracking_backend.git/internal/core/router"
+	"github.com/tmazitov/tracking_backend.git/pkg/conductor"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
+	"github.com/tmazitov/tracking_backend.git/pkg/router"
 )
 
 type Router struct {

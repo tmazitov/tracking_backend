@@ -3,8 +3,8 @@ package rest
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/aaa/bl"
-	"github.com/tmazitov/tracking_backend.git/internal/core/conductor"
-	core "github.com/tmazitov/tracking_backend.git/internal/core/request"
+	"github.com/tmazitov/tracking_backend.git/pkg/conductor"
+	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
 type AuthUserSendCode struct {

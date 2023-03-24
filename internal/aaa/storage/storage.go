@@ -5,7 +5,7 @@ import (
 
 	"github.com/tmazitov/tracking_backend.git/internal/aaa/bl"
 	"github.com/tmazitov/tracking_backend.git/internal/aaa/storage/user"
-	repo "github.com/tmazitov/tracking_backend.git/internal/core/repo"
+	repo "github.com/tmazitov/tracking_backend.git/pkg/repo"
 )
 
 type Storage struct {

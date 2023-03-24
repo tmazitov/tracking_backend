@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 )
 
 const MAX_ATTEND_COUNT = 6

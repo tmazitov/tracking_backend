@@ -3,9 +3,9 @@ package rest
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/aaa/bl"
-	"github.com/tmazitov/tracking_backend.git/internal/core/conductor"
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
-	core "github.com/tmazitov/tracking_backend.git/internal/core/request"
+	"github.com/tmazitov/tracking_backend.git/pkg/conductor"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
+	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
 type AuthUserTakeCode struct {

@@ -2,9 +2,9 @@ package main
 
 import (
 	config "github.com/tmazitov/tracking_backend.git/config/tms"
-	"github.com/tmazitov/tracking_backend.git/internal/core/repo"
 	rest "github.com/tmazitov/tracking_backend.git/internal/tms/rest"
 	storage "github.com/tmazitov/tracking_backend.git/internal/tms/storage"
+	"github.com/tmazitov/tracking_backend.git/pkg/repo"
 )
 
 func main() {

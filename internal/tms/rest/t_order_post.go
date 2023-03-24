@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	core "github.com/tmazitov/tracking_backend.git/internal/core/request"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
+	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
 type AddOrderHandler struct {

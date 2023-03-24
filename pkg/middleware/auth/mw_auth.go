@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
-	core "github.com/tmazitov/tracking_backend.git/internal/core/request"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
+	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
 var (

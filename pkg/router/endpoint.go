@@ -1,6 +1,6 @@
 package router
 
-import "github.com/tmazitov/tracking_backend.git/internal/core/middleware"
+import "github.com/tmazitov/tracking_backend.git/pkg/middleware"
 
 type Endpoint struct {
 	Method     string

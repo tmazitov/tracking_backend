@@ -3,7 +3,7 @@ package conductor
 import (
 	"context"
 
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 )
 
 func (c *Conductor) CreateTokenPair(ctx context.Context, claims jwt.AccessClaims) (jwt.TokenPair, error) {

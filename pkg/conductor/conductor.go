@@ -2,7 +2,7 @@ package conductor
 
 import (
 	"github.com/redis/go-redis/v9"
-	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 )
 
 type Config struct {

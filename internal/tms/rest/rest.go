@@ -1,8 +1,8 @@
 package rest
 
 import (
-	"github.com/tmazitov/tracking_backend.git/internal/core/router"
 	bl "github.com/tmazitov/tracking_backend.git/internal/tms/bl"
+	"github.com/tmazitov/tracking_backend.git/pkg/router"
 )
 
 type Router struct {
