@@ -8,6 +8,7 @@ import (
 )
 
 type AccessClaims struct {
+	UserId    int
 	IP        string
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`

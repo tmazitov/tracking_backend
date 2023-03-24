@@ -34,7 +34,10 @@ func (h *AuthUserSendCode) Handle(c *gin.Context) {
 
 	// fmt.Println(exist)
 
-	h.result.Token, err = h.Conductor.CreateTicket(c, email)
+	h.result.Token, err = h.Conductor.CreateCode(c, conductor.CodePayload{
+		Email: email,
+		Ip:    c.ClientIP(),
+	})
 
 	if err == conductor.ErrTooManyAttempts {
 		core.ErrorLog(429, "Too many attempts", err, c)

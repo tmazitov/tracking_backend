@@ -8,39 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var (
-	ErrTokenIsNotExist = errors.New("token is not exist")
-)
-
-func (s *JwtStorage) AccessIsExists(ctx context.Context, token string) error {
-	return s.isExists(ctx, "acc:", token)
-}
-
-func (s *JwtStorage) RefreshIsExists(ctx context.Context, token string) error {
-	return s.isExists(ctx, "ref:", token)
-
-}
-
-func (s *JwtStorage) ValidateAccess(ctx context.Context, token string) (*AccessClaims, error) {
-
-	// Check if token is exists
-	if err := s.AccessIsExists(ctx, token); err != nil {
-		return nil, err
-	}
-
-	return s.verifyToken(ctx, token)
-}
-
-func (s *JwtStorage) ValidateRefresh(ctx context.Context, token string) (*AccessClaims, error) {
-
-	// Check if token is exists
-	if err := s.RefreshIsExists(ctx, token); err != nil {
-		return nil, err
-	}
-
-	return s.verifyToken(ctx, token)
-}
-
 func (s *JwtStorage) verifyToken(ctx context.Context, token string) (*AccessClaims, error) {
 
 	keyFunc := func(token *jwt.Token) (interface{}, error) {

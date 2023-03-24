@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS users CASCADE; 
+
+CREATE TABLE users (
+    id			BIGINT GENERATED ALWAYS AS IDENTITY UNIQUE,
+    
+    email		VARCHAR(64)	NOT NULL,
+	short_name	VARCHAR(20),
+	telephone	VARCHAR(12),
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    edited_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY(id)
+);

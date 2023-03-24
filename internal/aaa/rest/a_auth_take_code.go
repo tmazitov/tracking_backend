@@ -10,7 +10,8 @@ import (
 
 type AuthUserTakeCode struct {
 	Storage   bl.Storage
-	Conductor conductor.Conductor
+	Jwt       *jwt.JwtStorage
+	Conductor *conductor.Conductor
 	input     struct {
 		Token string
 		Code  string
@@ -27,26 +28,38 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// If token is invalid
-	ticket, err := h.Conductor.GetTicket(ctx, h.input.Token)
-	if err == conductor.ErrInvalidToken {
+	payload, err := h.Conductor.ValidateCode(ctx, h.input.Token)
+	if err != nil {
 		core.ErrorLog(400, "Bad request", err, ctx)
 		return
 	}
 
+	// If token is invalid
+	recordedCode, err := h.Conductor.GetCode(ctx, h.input.Token)
+	if err == conductor.ErrInvalidToken {
+		core.ErrorLog(400, "Bad request", err, ctx)
+		return
+	}
 	if err != nil {
 		core.ErrorLog(500, "Internal Server error", err, ctx)
 		return
 	}
 
 	// If code is invalid
-	if err = ticket.ValidateCode(h.input.Code); err != nil {
+	if h.input.Code != recordedCode {
 		core.ErrorLog(400, "Bad request", err, ctx)
 		return
 	}
 
-	tokens, err := h.Conductor.CreateTokenPair(ctx, jwt.AccessClaims{
-		IP: ctx.ClientIP(),
+	var userId int
+	userId, err = h.createUserIfNotExists(payload.Email)
+	if err != nil {
+		core.ErrorLog(500, "Internal Server error", err, ctx)
+		return
+	}
+	tokens, err := h.Jwt.CreateTokenPair(ctx, jwt.AccessClaims{
+		IP:     ctx.ClientIP(),
+		UserId: userId,
 	})
 	if err != nil {
 		core.ErrorLog(500, "Internal Server error", err, ctx)
@@ -56,10 +69,33 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 	h.result.Access = tokens.Access
 	h.result.Refresh = tokens.Refresh
 
-	if err := h.Conductor.DeleteTicket(ctx, h.input.Token); err != nil {
+	if err := h.Conductor.DeleteCode(ctx, h.input.Token); err != nil {
 		core.ErrorLog(500, "Internal Server error", err, ctx)
 		return
 	}
 
 	core.SendResponse(201, h.result, ctx)
+}
+
+func (h *AuthUserTakeCode) createUserIfNotExists(email string) (int, error) {
+	var (
+		err error
+	)
+
+	// Check exist user
+	userIsExists, err := h.Storage.UserStorage().CheckUserByEmail(email)
+	if err != nil {
+		return -1, err
+	}
+	if userIsExists {
+		return -1, nil
+	}
+
+	// Create new user
+	userId, err := h.Storage.UserStorage().CreateUser(email)
+	if err != nil {
+		return -1, err
+	}
+
+	return userId, nil
 }

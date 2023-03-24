@@ -7,9 +7,9 @@ import (
 )
 
 type emailMessage struct {
-	Email  string
-	Ticket string
-	Title  string
+	Email       string
+	Title       string
+	HTMLMessage string
 }
 
 func (c *Conductor) senderWorker(messageChan chan emailMessage) {
@@ -18,19 +18,19 @@ func (c *Conductor) senderWorker(messageChan chan emailMessage) {
 	for {
 		select {
 		case m := <-messageChan:
-			if err := c.sendToEmail(m.Email, m.Title, m.Ticket); err != nil {
+			if err := c.sendToEmail(m.Email, m.Title, m.HTMLMessage); err != nil {
 				log.Println(err.Error())
 			}
 		}
 	}
 }
 
-func (c *Conductor) sendToEmail(toEmail string, title string, ticket string) error {
+func (c *Conductor) sendToEmail(toEmail string, title string, HTMLMessage string) error {
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", c.config.Email)
 	msg.SetHeader("To", toEmail)
 	msg.SetHeader("Subject", title)
-	msg.SetBody("text/html", ticket)
+	msg.SetBody("text/html", HTMLMessage)
 
 	n := gomail.NewDialer("smtp.gmail.com", 587, c.config.Email, c.config.Pass)
 

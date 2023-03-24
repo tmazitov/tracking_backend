@@ -39,7 +39,7 @@ func (r *Router) Endpoints() []router.Endpoint {
 
 	return []router.Endpoint{
 		{Method: "POST", Path: "/auth", Handler: &AuthUserSendCode{Storage: r.storage, Conductor: r.conductor}},
-		{Method: "POST", Path: "/auth/code", Handler: &AuthUserTakeCode{Storage: r.storage, Conductor: r.conductor}},
+		{Method: "POST", Path: "/auth/code", Handler: &AuthUserTakeCode{Storage: r.storage, Conductor: &r.conductor, Jwt: r.jwt}},
 
 		{Method: "POST", Path: "/refresh", Handler: &RefreshHandler{Storage: r.storage, Jwt: r.jwt}},
 	}
