@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package auth;
+option go_package = "../api";
+
+
+message CheckRequest {
+    string token = 1;
+}
+
+message CheckResponse {
+    bool result = 1;
+}
+
+service AAA {
+    rpc CheckAuth (CheckRequest) returns (CheckResponse) {}
+}
+

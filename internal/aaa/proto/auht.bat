@@ -1,0 +1,1 @@
+protoc --go_out=./api --go-grpc_out=require_unimplemented_servers=false:./api  ./files/auth.proto

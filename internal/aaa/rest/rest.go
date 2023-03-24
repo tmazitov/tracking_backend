@@ -4,7 +4,6 @@ import (
 	bl "github.com/tmazitov/tracking_backend.git/internal/aaa/bl"
 	"github.com/tmazitov/tracking_backend.git/internal/core/conductor"
 	"github.com/tmazitov/tracking_backend.git/internal/core/jwt"
-	"github.com/tmazitov/tracking_backend.git/internal/core/middleware/auth"
 	"github.com/tmazitov/tracking_backend.git/internal/core/router"
 )
 
@@ -35,15 +34,14 @@ func NewRouter(servicePath string, storage bl.Storage, conductor conductor.Condu
 func (r *Router) Endpoints() []router.Endpoint {
 
 	var (
-		authMiddleware = &auth.Middleware{Jwt: r.jwt}
+	// authMiddleware = &auth.Middleware{Jwt: r.jwt}
 	)
 
 	return []router.Endpoint{
 		{Method: "POST", Path: "/auth", Handler: &AuthUserSendCode{Storage: r.storage, Conductor: r.conductor}},
 		{Method: "POST", Path: "/auth/code", Handler: &AuthUserTakeCode{Storage: r.storage, Conductor: r.conductor}},
 
-		{Method: "POST", Path: "/refresh", Handler: &RefreshHandler{Storage: r.storage, Jwt: r.jwt},
-			Middleware: authMiddleware},
+		{Method: "POST", Path: "/refresh", Handler: &RefreshHandler{Storage: r.storage, Jwt: r.jwt}},
 	}
 }
 
