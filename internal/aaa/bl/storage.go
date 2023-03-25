@@ -1,7 +1,7 @@
 package bl
 
 type UserStorage interface {
-	CheckUserByEmail(email string) (bool, error)
+	CheckUserByEmail(email string) (int, int, error)
 	CreateUser(email string) (int, error)
 }
 

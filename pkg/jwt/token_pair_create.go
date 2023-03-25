@@ -8,8 +8,8 @@ import (
 )
 
 type AccessClaims struct {
-	UserId    int
-	IP        string
+	UserId    int       `json:"user_id"`
+	RoleId    int       `json:"role_id"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }

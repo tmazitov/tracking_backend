@@ -3,9 +3,10 @@ package bl
 type UserRole int
 
 const (
-	Base   UserRole = 1
-	Manage UserRole = 2
-	Admin  UserRole = 3
+	Base    UserRole = 1
+	Worker  UserRole = 2
+	Manager UserRole = 3
+	Admin   UserRole = 4
 )
 
 type GetUser struct {

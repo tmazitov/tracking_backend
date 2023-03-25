@@ -51,14 +51,17 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 		return
 	}
 
-	var userId int
-	userId, err = h.createUserIfNotExists(payload.Email)
+	var (
+		userId int
+		roleId int
+	)
+	userId, roleId, err = h.createUserIfNotExists(payload.Email)
 	if err != nil {
 		core.ErrorLog(500, "Internal Server error", err, ctx)
 		return
 	}
 	tokens, err := h.Jwt.CreateTokenPair(ctx, jwt.AccessClaims{
-		IP:     ctx.ClientIP(),
+		RoleId: roleId,
 		UserId: userId,
 	})
 	if err != nil {
@@ -77,25 +80,22 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 	core.SendResponse(201, h.result, ctx)
 }
 
-func (h *AuthUserTakeCode) createUserIfNotExists(email string) (int, error) {
+func (h *AuthUserTakeCode) createUserIfNotExists(email string) (int, int, error) {
 	var (
 		err error
 	)
 
 	// Check exist user
-	userIsExists, err := h.Storage.UserStorage().CheckUserByEmail(email)
-	if err != nil {
-		return -1, err
-	}
-	if userIsExists {
-		return -1, nil
+	userId, roleId, err := h.Storage.UserStorage().CheckUserByEmail(email)
+	if err != nil || userId != 0 {
+		return userId, roleId, err
 	}
 
 	// Create new user
-	userId, err := h.Storage.UserStorage().CreateUser(email)
+	userId, err = h.Storage.UserStorage().CreateUser(email)
 	if err != nil {
-		return -1, err
+		return userId, 0, err
 	}
 
-	return userId, nil
+	return userId, 0, nil
 }

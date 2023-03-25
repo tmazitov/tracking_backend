@@ -26,14 +26,6 @@ func (h *AuthUserSendCode) Handle(c *gin.Context) {
 	var err error
 	email := h.input.Email
 
-	// exist, err := h.Storage.UserStorage().CheckUserByEmail(email)
-	// if err != nil {
-	// 	core.ErrorLog(500, "Internal server error", err, c)
-	// 	return
-	// }
-
-	// fmt.Println(exist)
-
 	h.result.Token, err = h.Conductor.CreateCode(c, conductor.CodePayload{
 		Email: email,
 		Ip:    c.ClientIP(),
