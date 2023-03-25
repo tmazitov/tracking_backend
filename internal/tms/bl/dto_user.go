@@ -1,5 +1,7 @@
 package bl
 
+import "database/sql"
+
 type UserRole int
 
 const (
@@ -13,4 +15,10 @@ type GetUser struct {
 	TelNumber string   `json:"telNumber"`
 	ShortName string   `json:"shotName"`
 	RoleID    UserRole `json:"roleId"`
+}
+
+type SelectUserById struct {
+	TelNumber sql.NullString
+	ShortName sql.NullString
+	RoleID    UserRole
 }

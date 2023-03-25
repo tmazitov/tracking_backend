@@ -6,9 +6,10 @@ type OrderStorage interface {
 }
 
 type UserStorage interface {
-	GetUSer(int)
+	GetUserInfo(userId int) (SelectUserById, error)
 }
 
 type Storage interface {
 	OrderStorage() OrderStorage
+	UserStorage() UserStorage
 }

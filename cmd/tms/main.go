@@ -1,9 +1,11 @@
 package main
 
 import (
+	"github.com/redis/go-redis/v9"
 	config "github.com/tmazitov/tracking_backend.git/config/tms"
 	rest "github.com/tmazitov/tracking_backend.git/internal/tms/rest"
 	storage "github.com/tmazitov/tracking_backend.git/internal/tms/storage"
+	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 	"github.com/tmazitov/tracking_backend.git/pkg/repo"
 )
 
@@ -20,8 +22,15 @@ func main() {
 	gisConf := config.GisConfig()
 	gis := &repo.Repo{Config: gisConf}
 
-	storage := storage.NewStorage(store, gis)
+	// Setup redis api
+	redis := redis.NewClient(config.RedisConfig())
 
-	router := rest.NewRouter("/tms/api", storage)
+	// Setup jwt api
+	jwtConf := config.JwtConfig()
+	jwt := jwt.NewJwtStorage(jwtConf, redis)
+
+	storage := storage.NewStorage(store, store, gis)
+
+	router := rest.NewRouter("/tms/api", storage, jwt)
 	router.Run("5001")
 }

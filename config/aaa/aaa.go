@@ -29,7 +29,6 @@ func (c *Config) Setup() error {
 	var result map[string]interface{}
 	json.Unmarshal([]byte(byteValue), &result)
 
-	fmt.Println("Config : ", result)
 	c.Data = result
 
 	return nil
