@@ -4,7 +4,7 @@ import "time"
 
 type CreateOrder struct {
 	StartAt        time.Time
-	EndAt          time.Time
+	OwnerID        int
 	PointsID       []int64
 	Helpers        uint8
 	Comment        string

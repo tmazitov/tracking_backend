@@ -30,7 +30,7 @@ func NewRouter(servicePath string, storage bl.Storage, jwtStorage *jwt.JwtStorag
 
 func (r *Router) Endpoints() []router.Endpoint {
 	return []router.Endpoint{
-		{Method: "POST", Path: "/order", Handler: &AddOrderHandler{Storage: r.storage}},
+		{Method: "POST", Path: "/order", Handler: &AddOrderHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/user", Handler: &GetOrderHandler{Storage: r.storage, Jwt: *r.jwt}},
 	}
 }
