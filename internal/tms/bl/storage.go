@@ -2,9 +2,9 @@ package bl
 
 type OrderStorage interface {
 	OrderList(userId int, roleId int) ([]DB_OrderListItem, error)
-	InsertOrder(order CreateOrder) error
-	InsertPoint(points []Point) ([]int64, error)
-	PointGet(pointsID []int64) ([]Point, error)
+	CreateOrder(order CreateOrder, isManager bool) error
+	CreatePoints(points []Point) ([]int64, error)
+	GetPoints(pointsID []int64) ([]Point, error)
 }
 
 type UserStorage interface {

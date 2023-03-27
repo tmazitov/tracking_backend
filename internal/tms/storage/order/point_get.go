@@ -19,7 +19,7 @@ func getPointsIdString(pointsID []int64) string {
 	return result
 }
 
-func (s *Storage) PointGet(pointsID []int64) ([]bl.Point, error) {
+func (s *Storage) GetPoints(pointsID []int64) ([]bl.Point, error) {
 	var (
 		result []bl.Point
 		err    error

@@ -42,7 +42,7 @@ func getOrderList(userId int, roleId int, storage bl.Storage) ([]bl.R_OrderListI
 	}
 
 	for _, order := range orders {
-		points, err := storage.OrderStorage().PointGet(order.PointsID)
+		points, err := storage.OrderStorage().GetPoints(order.PointsID)
 		if err != nil {
 			return result, err
 		}

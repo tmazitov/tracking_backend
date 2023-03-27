@@ -7,7 +7,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) InsertPoint(points []bl.Point) ([]int64, error) {
+func (s *Storage) CreatePoints(points []bl.Point) ([]int64, error) {
 
 	result := []int64{}
 	conn, err := s.gis.Conn()

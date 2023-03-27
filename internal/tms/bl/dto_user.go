@@ -5,10 +5,10 @@ import "database/sql"
 type UserRole int
 
 const (
-	Base    UserRole = 1
-	Worker  UserRole = 2
-	Manager UserRole = 3
-	Admin   UserRole = 4
+	Base    UserRole = 0
+	Worker  UserRole = 1
+	Manager UserRole = 2
+	Admin   UserRole = 3
 )
 
 type GetUser struct {
