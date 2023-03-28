@@ -27,6 +27,7 @@ const (
 )
 
 type R_OrderListItem struct {
+	ID             int64     `json:"orderId"`
 	StartAt        time.Time `json:"startAt"`
 	EndAt          time.Time `json:"endAt,omitempty"`
 	StatusID       int       `json:"statusId"`
@@ -40,6 +41,7 @@ type R_OrderListItem struct {
 }
 
 type DB_OrderListItem struct {
+	ID             int64
 	CreatedAt      time.Time
 	StartAt        time.Time
 	EndAt          sql.NullTime

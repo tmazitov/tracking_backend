@@ -27,12 +27,12 @@ type OrderCreateHandler struct {
 func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 	userPayload, err := h.Jwt.ValidateAccess(ctx)
 	if err != nil {
-		core.ErrorLog(403, "Unauthorized", err, ctx)
+		core.ErrorLog(401, "Unauthorized", err, ctx)
 		return
 	}
 
 	if userPayload.RoleId == int(bl.Worker) {
-		core.ErrorLog(403, "Forbidden", errors.New("Worker can not to create the order"), ctx)
+		core.ErrorLog(403, "Forbidden", errors.New("worker can not to create the order"), ctx)
 		return
 	}
 

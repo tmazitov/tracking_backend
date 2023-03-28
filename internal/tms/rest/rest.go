@@ -31,6 +31,7 @@ func NewRouter(servicePath string, storage bl.Storage, jwtStorage *jwt.JwtStorag
 func (r *Router) Endpoints() []router.Endpoint {
 	return []router.Endpoint{
 		{Method: "POST", Path: "/order", Handler: &OrderCreateHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "GET", Path: "/order/:orderId/upgrade", Handler: &OrderStatusUpgradeHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/list", Handler: &OrderListHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/user", Handler: &OrderGetHandler{Storage: r.storage, Jwt: *r.jwt}},
 	}

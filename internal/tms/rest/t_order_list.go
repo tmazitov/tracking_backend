@@ -18,7 +18,7 @@ type OrderListHandler struct {
 func (h *OrderListHandler) Handle(ctx *gin.Context) {
 	userPayload, err := h.Jwt.ValidateAccess(ctx)
 	if err != nil {
-		core.ErrorLog(403, "Unauthorized", err, ctx)
+		core.ErrorLog(401, "Unauthorized", err, ctx)
 		return
 	}
 
@@ -48,6 +48,7 @@ func getOrderList(userId int, roleId int, storage bl.Storage) ([]bl.R_OrderListI
 		}
 
 		result_item := bl.R_OrderListItem{
+			ID:             order.ID,
 			StartAt:        order.StartAt,
 			EndAt:          order.EndAt.Time,
 			StatusID:       order.StatusID,

@@ -16,7 +16,7 @@ type OrderGetHandler struct {
 func (h *OrderGetHandler) Handle(ctx *gin.Context) {
 	userPayload, err := h.Jwt.ValidateAccess(ctx)
 	if err != nil {
-		core.ErrorLog(403, "Unauthorized", err, ctx)
+		core.ErrorLog(401, "Unauthorized", err, ctx)
 		return
 	}
 

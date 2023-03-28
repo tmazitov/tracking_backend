@@ -25,6 +25,7 @@ func (s *Storage) OrderList(userId int, roleId int) ([]bl.DB_OrderListItem, erro
 	for rows.Next() {
 		ord := bl.DB_OrderListItem{}
 		err := rows.Scan(
+			&ord.ID,
 			&ord.CreatedAt,
 			&ord.StartAt,
 			&ord.EndAt,
@@ -54,6 +55,7 @@ func (s *Storage) orderList(userId int, roleFieldName string) (*sql.Rows, error)
 	defer s.repo.Close()
 
 	execString := `SELECT      		
+		id,
 		created_at,
 		start_at,       
 		end_at,
