@@ -17,6 +17,11 @@ type GetUser struct {
 	RoleID    UserRole `json:"roleId"`
 }
 
+type PutUser struct {
+	TelNumber string `json:"telNumber"`
+	ShortName string `json:"shotName"`
+}
+
 type SelectUserById struct {
 	TelNumber sql.NullString
 	ShortName sql.NullString

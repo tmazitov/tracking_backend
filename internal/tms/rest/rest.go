@@ -33,7 +33,8 @@ func (r *Router) Endpoints() []router.Endpoint {
 		{Method: "POST", Path: "/order", Handler: &OrderCreateHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/:orderId/upgrade", Handler: &OrderStatusUpgradeHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/list", Handler: &OrderListHandler{Storage: r.storage, Jwt: *r.jwt}},
-		{Method: "GET", Path: "/user", Handler: &OrderGetHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "GET", Path: "/user", Handler: &UserGetHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "PUT", Path: "/user", Handler: &UserPutHandler{Storage: r.storage, Jwt: *r.jwt}},
 	}
 }
 

@@ -7,13 +7,13 @@ import (
 	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
-type OrderGetHandler struct {
+type UserGetHandler struct {
 	Jwt     jwt.JwtStorage
 	Storage bl.Storage
 	result  bl.GetUser
 }
 
-func (h *OrderGetHandler) Handle(ctx *gin.Context) {
+func (h *UserGetHandler) Handle(ctx *gin.Context) {
 	userPayload, err := h.Jwt.ValidateAccess(ctx)
 	if err != nil {
 		core.ErrorLog(401, "Unauthorized", err, ctx)

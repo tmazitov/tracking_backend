@@ -13,6 +13,7 @@ type OrderStorage interface {
 
 type UserStorage interface {
 	GetUserInfo(userId int) (SelectUserById, error)
+	UpdateUserShortName(userId int, shortName string) error
 }
 
 type Storage interface {
