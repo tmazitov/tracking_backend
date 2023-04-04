@@ -19,7 +19,7 @@ func (s *Storage) CheckUserByEmail(email string) (int, int, error) {
 
 	defer s.repo.Close()
 
-	execString := `SELECT id, role_id FROM users WHERE email=$1 `
+	execString := `SELECT id, role FROM users WHERE email=$1 `
 	rows, err := conn.Query(execString, email)
 	if err != nil {
 		return -1, -1, errors.New("DB exec error: " + err.Error())
