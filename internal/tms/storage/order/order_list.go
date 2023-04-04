@@ -63,7 +63,7 @@ func (s *Storage) orderList(userId int, roleFieldName string) (*sql.Rows, error)
 		worker_id,   
 		manager_id,
 		status_id,
-		points,
+		points_id,
 		helpers,
 		comment_message,
 		is_fragile_cargo

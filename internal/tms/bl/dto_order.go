@@ -55,7 +55,24 @@ type DB_OrderListItem struct {
 	IsFragileCargo bool
 }
 
+type R_CreatableOrder struct {
+	StartAt        time.Time `json:"startAt" validate:"max=32"`
+	Points         []Point   `json:"points"`
+	Helpers        uint8     `json:"helpers,omitempty"`
+	Comment        string    `json:"comment,omitempty" validate:"max=256"`
+	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+}
+
+type R_EditableOrder struct {
+	StartAt        time.Time `json:"startAt" validate:"max=32"`
+	Points         []Point   `json:"points"`
+	Helpers        uint8     `json:"helpers" validate:"max=32""`
+	Comment        string    `json:"comment,omitempty" validate:"max=256"`
+	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+}
+
 type Point struct {
+	StepID    int16   `json:"step_id" validate:"max=256"`
 	Title     string  `json:"title" validate:"max=128"`
 	Floor     int8    `json:"floor" validate:"max=128"`
 	Latitude  float32 `json:"lat" validate:"max=32"`

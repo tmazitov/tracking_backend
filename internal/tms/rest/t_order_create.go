@@ -2,7 +2,6 @@ package rest
 
 import (
 	"errors"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
@@ -13,15 +12,7 @@ import (
 type OrderCreateHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
-	input   struct {
-		StartAt        time.Time  `json:"startAt" validate:"max=32"`
-		Points         []bl.Point `json:"points"`
-		Helpers        uint8      `json:"helpers,omitempty"`
-		Comment        string     `json:"comment,omitempty" validate:"max=256"`
-		IsFragileCargo bool       `json:"isFragileCargo,omitempty"`
-	}
-	result struct {
-	}
+	input   bl.R_CreatableOrder
 }
 
 func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
@@ -61,5 +52,5 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	core.SendResponse(201, h.result, ctx)
+	core.SendResponse(201, nil, ctx)
 }

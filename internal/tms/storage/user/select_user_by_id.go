@@ -20,7 +20,7 @@ func (s *Storage) GetUserInfo(userId int) (bl.SelectUserById, error) {
 
 	defer s.repo.Close()
 
-	execString := `SELECT telephone, short_name, role_id FROM users WHERE id=$1`
+	execString := `SELECT telephone, short_name, role FROM users WHERE id=$1`
 
 	if err := conn.QueryRow(execString, userId).Scan(&result.TelNumber, &result.ShortName, &result.RoleID); err != nil {
 		return result, errors.New("DB exec error: " + err.Error())
