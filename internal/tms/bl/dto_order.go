@@ -10,7 +10,7 @@ import (
 type CreateOrder struct {
 	StartAt        time.Time
 	OwnerID        int
-	PointsID       []int64
+	Points         []Point
 	Helpers        uint8
 	Comment        string
 	IsFragileCargo bool
@@ -71,10 +71,31 @@ type R_EditableOrder struct {
 	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
 }
 
+type DB_EditableOrder struct {
+	StartAt        time.Time `json:"startAt" validate:"max=32"`
+	PointsID       []int64   `json:"points"`
+	Helpers        uint8     `json:"helpers" validate:"max=32""`
+	Comment        string    `json:"comment,omitempty" validate:"max=256"`
+	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+}
+
 type Point struct {
+	ID        int64   `json:"id"`
 	StepID    int16   `json:"step_id" validate:"max=256"`
 	Title     string  `json:"title" validate:"max=128"`
 	Floor     int8    `json:"floor" validate:"max=128"`
 	Latitude  float32 `json:"lat" validate:"max=32"`
 	Longitude float32 `json:"lon" validate:"max=32"`
+}
+
+func (p *Point) ToCreateData() []interface{} {
+	var data []interface{}
+	data = append(data, p.Title, p.StepID, p.Floor, p.Latitude, p.Longitude)
+	return data
+}
+
+func (p *Point) ToEditData() []interface{} {
+	var data []interface{}
+	data = append(data, p.ID, p.Title, p.StepID, p.Floor, p.Latitude, p.Longitude)
+	return data
 }

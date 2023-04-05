@@ -19,7 +19,7 @@ func getPointsIdString(pointsID []int64) string {
 	return result
 }
 
-func (s *Storage) GetPoints(pointsID []int64) ([]bl.Point, error) {
+func (s *Storage) PointsGet(pointsID []int64) ([]bl.Point, error) {
 	var (
 		result []bl.Point
 		err    error
@@ -34,7 +34,7 @@ func (s *Storage) GetPoints(pointsID []int64) ([]bl.Point, error) {
 	defer s.gis.Close()
 
 	pointsString := getPointsIdString(pointsID)
-	execString := fmt.Sprintf("SELECT floor, title, ST_X(ST_AsText(point)), ST_Y(ST_AsText(point)) FROM points WHERE id IN ( %s)", pointsString)
+	execString := fmt.Sprintf("SELECT id, floor, title, ST_X(ST_AsText(point)), ST_Y(ST_AsText(point)) FROM points WHERE id IN ( %s)", pointsString)
 
 	rows, err := conn.Query(execString)
 	if err != nil {
@@ -43,6 +43,7 @@ func (s *Storage) GetPoints(pointsID []int64) ([]bl.Point, error) {
 	for rows.Next() {
 		p := bl.Point{}
 		err := rows.Scan(
+			&p.ID,
 			&p.Floor,
 			&p.Title,
 			&p.Latitude,

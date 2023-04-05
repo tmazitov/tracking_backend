@@ -8,29 +8,36 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) CreatePoints(points []bl.Point) ([]int64, error) {
+func (s *Storage) PointsCreate(orderID int, points []bl.Point) ([]int64, error) {
 
-	result := []int64{}
 	conn, err := s.gis.Conn()
 	if err != nil {
 		return nil, errors.New("DB conn error: " + err.Error())
 	}
 
+	tx, err := conn.Begin()
+	if err != nil {
+		return nil, errors.New("DB transaction begin err: " + err.Error())
+	}
+
 	defer s.gis.Close()
 
 	var (
-		values              []interface{}
+		pointsID            []int64
+		orderToPointValues  []interface{}
+		createOrderValues   []interface{}
 		unknownValuesString string
 	)
-	values, unknownValuesString = getPointsValues(points)
+	createOrderValues, unknownValuesString = getCreatablePointsValues(points)
 
 	execString := fmt.Sprintf(`INSERT INTO points 
 	(title, step_id, floor, point) 
 	VALUES %s
 	RETURNING id`, unknownValuesString)
 
-	rows, err := conn.Query(execString, values...)
+	rows, err := conn.Query(execString, createOrderValues...)
 	if err != nil {
+		tx.Rollback()
 		return nil, errors.New("DB exec error: " + err.Error())
 	}
 
@@ -39,15 +46,38 @@ func (s *Storage) CreatePoints(points []bl.Point) ([]int64, error) {
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
+			tx.Rollback()
 			return nil, errors.New("DB get data error: " + err.Error())
 		}
-		result = append(result, id)
+		pointsID = append(pointsID, id)
 	}
 
-	return result, nil
+	var counter int = 1
+	unknownValuesString = ""
+	for index, pointID := range pointsID {
+		orderToPointValues = append(orderToPointValues, orderID, pointID)
+		unknownValuesString += fmt.Sprintf("($%d, $%d)", counter, counter+1)
+		if index != len(points)-1 {
+			unknownValuesString += ", "
+		}
+		counter += 2
+	}
+
+	execString = fmt.Sprintf(`INSERT INTO points_to_orders (order_id, point_id) VALUES %s`, unknownValuesString)
+	if err = tx.QueryRow(execString, orderToPointValues...).Err(); err != nil {
+		tx.Rollback()
+		return nil, errors.New("DB exec error: " + err.Error())
+	}
+
+	if err = tx.Commit(); err != nil {
+		tx.Rollback()
+		return nil, errors.New("DB transaction continue err: " + err.Error())
+	}
+
+	return pointsID, nil
 }
 
-func getPointsValues(points []bl.Point) ([]interface{}, string) {
+func getCreatablePointsValues(points []bl.Point) ([]interface{}, string) {
 	var (
 		values              []interface{}
 		unknownValuesString string
@@ -55,7 +85,7 @@ func getPointsValues(points []bl.Point) ([]interface{}, string) {
 	unknownValuesString = ""
 	for index, point := range points {
 		values = append(values, point.Title, point.StepID, point.Floor)
-		unknownValuesString += getUnknownValueItem(index*3+1, point)
+		unknownValuesString += getCreatableUnknownValueItem(index*3+1, point)
 		if index != len(points)-1 {
 			unknownValuesString += ", "
 		}
@@ -63,7 +93,7 @@ func getPointsValues(points []bl.Point) ([]interface{}, string) {
 	return values, unknownValuesString
 }
 
-func getUnknownValueItem(startWith int, point bl.Point) string {
+func getCreatableUnknownValueItem(startWith int, point bl.Point) string {
 	var unknownValueItem = "("
 	for i := startWith; i < startWith+3; i++ {
 		unknownValueItem += "$" + strconv.Itoa(i)

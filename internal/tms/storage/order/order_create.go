@@ -1,6 +1,7 @@
 package order
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -8,41 +9,74 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) error {
-	conn, err := s.repo.Conn()
-	if err != nil {
-		return errors.New("DB conn error: " + err.Error())
-	}
-
-	tx, err := conn.Begin()
-	if err != nil {
-		return errors.New("DB transaction begin err: " + err.Error())
-	}
+func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) (int64, error) {
 
 	var (
-		orderID            int64
-		execString         string
-		orderValues        []interface{}
-		orderToPointValues []interface{}
+		orderToPointValues  []interface{}
+		createOrderValues   []interface{}
+		unknownValuesString string
+		pointsID            []int64
+		orderID             int64
+		execString          string
+		orderValues         []interface{}
+		tx                  *sql.Tx
 	)
+
+	conn, err := s.repo.Conn()
+	if err != nil {
+		return 0, errors.New("DB conn error: " + err.Error())
+	}
+
 	defer s.repo.Close()
 
+	tx, err = conn.Begin()
+	if err != nil {
+		return 0, errors.New("DB transaction begin error: " + err.Error())
+	}
+
+	// Create initial points of order and get the points id
+	createOrderValues, unknownValuesString = getCreatablePointsValues(order.Points)
+	execString = fmt.Sprintf(`INSERT INTO points 
+		(title, step_id, floor, point) 
+		VALUES %s
+		RETURNING id`, unknownValuesString)
+
+	rows, err := conn.Query(execString, createOrderValues...)
+	if err != nil {
+		tx.Rollback()
+		return 0, errors.New("DB exec error: " + err.Error())
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			tx.Rollback()
+			return 0, errors.New("DB get data error: " + err.Error())
+		}
+		pointsID = append(pointsID, id)
+	}
+
+	// Create new order and get the new order id
 	if isManager {
-		execString, orderValues = getManagerExecParts(order)
+		execString, orderValues = getManagerExecParts(order, pointsID)
 	} else {
-		execString, orderValues = getUserExecParts(order)
+		execString, orderValues = getUserExecParts(order, pointsID)
 	}
 
 	if err = tx.QueryRow(execString, orderValues...).Scan(&orderID); err != nil {
-		return errors.New("DB exec error: " + err.Error())
+		tx.Rollback()
+		return 0, errors.New("DB exec error: " + err.Error())
 	}
 
+	// Create relationship between the points and order
 	var counter int = 1
-	var unknownValuesString string = ""
-	for index, pointID := range order.PointsID {
+	unknownValuesString = ""
+	for index, pointID := range pointsID {
 		orderToPointValues = append(orderToPointValues, orderID, pointID)
 		unknownValuesString += fmt.Sprintf("($%d, $%d)", counter, counter+1)
-		if index != len(order.PointsID)-1 {
+		if index != len(pointsID)-1 {
 			unknownValuesString += ", "
 		}
 		counter += 2
@@ -50,17 +84,19 @@ func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) error {
 
 	execString = fmt.Sprintf(`INSERT INTO points_to_orders (order_id, point_id) VALUES %s`, unknownValuesString)
 	if err = tx.QueryRow(execString, orderToPointValues...).Err(); err != nil {
-		return errors.New("DB exec error: " + err.Error())
+		tx.Rollback()
+		return 0, errors.New("DB exec error: " + err.Error())
 	}
 
 	if err = tx.Commit(); err != nil {
-		return errors.New("DB transaction continue err: " + err.Error())
+		tx.Rollback()
+		return 0, errors.New("DB transaction continue err: " + err.Error())
 	}
 
-	return nil
+	return orderID, nil
 }
 
-func getUserExecParts(order bl.CreateOrder) (string, []interface{}) {
+func getUserExecParts(order bl.CreateOrder, pointsID []int64) (string, []interface{}) {
 	execString := `INSERT INTO orders 
 	(
 		start_at,
@@ -75,14 +111,14 @@ func getUserExecParts(order bl.CreateOrder) (string, []interface{}) {
 	return execString, []interface{}{
 		order.StartAt,
 		order.OwnerID,
-		pq.Array(order.PointsID),
+		pq.Int64Array(pointsID),
 		order.Helpers,
 		order.Comment,
 		order.IsFragileCargo,
 	}
 }
 
-func getManagerExecParts(order bl.CreateOrder) (string, []interface{}) {
+func getManagerExecParts(order bl.CreateOrder, pointsID []int64) (string, []interface{}) {
 	execString := `INSERT INTO orders 
 	(
 		start_at,
@@ -99,7 +135,7 @@ func getManagerExecParts(order bl.CreateOrder) (string, []interface{}) {
 		order.StartAt,
 		order.OwnerID,
 		order.OwnerID,
-		pq.Array(order.PointsID),
+		pq.Int64Array(pointsID),
 		order.Helpers,
 		order.Comment,
 		order.IsFragileCargo,

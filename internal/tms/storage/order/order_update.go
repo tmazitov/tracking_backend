@@ -7,15 +7,14 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) OrderUpdateMainInfo(orderId int, info bl.R_EditableOrder) (pq.Int64Array, error) {
+func (s *Storage) OrderUpdate(orderId int, info bl.DB_EditableOrder) error {
 	var (
-		pointsID pq.Int64Array
-		err      error
+		err error
 	)
 
 	conn, err := s.repo.Conn()
 	if err != nil {
-		return nil, errors.New("DB conn error: " + err.Error())
+		return errors.New("DB conn error: " + err.Error())
 	}
 	defer s.repo.Close()
 
@@ -23,14 +22,15 @@ func (s *Storage) OrderUpdateMainInfo(orderId int, info bl.R_EditableOrder) (pq.
 	UPDATE orders SET 
 		start_at=$2,
 		helpers=$3,
-		comment=$4,
-		is_fragile_cargo=$5,
+		points_id=$4,
+		comment_message=$5,
+		is_fragile_cargo=$6,
 		edited_at=now()
-	WHERE id=$1 RETURNING points`
+	WHERE id=$1 `
 
-	if err = conn.QueryRow(execString, orderId, info.StartAt, info.Helpers, info.IsFragileCargo).Scan(&pointsID); err != nil {
-		return nil, errors.New("DB exec error: " + err.Error())
+	if err = conn.QueryRow(execString, orderId, info.StartAt, info.Helpers, pq.Int64Array(info.PointsID), info.Comment, info.IsFragileCargo).Err(); err != nil {
+		return errors.New("DB exec error: " + err.Error())
 	}
 
-	return pointsID, nil
+	return nil
 }

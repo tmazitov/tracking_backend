@@ -13,6 +13,9 @@ type OrderCreateHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
 	input   bl.R_CreatableOrder
+	result  struct {
+		OrderID int64 `json:"orderId"`
+	}
 }
 
 func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
@@ -32,25 +35,24 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	pointIDs, err := h.Storage.OrderStorage().CreatePoints(h.input.Points)
-	if err != nil {
-		core.ErrorLog(500, "Internal server error", err, ctx)
-		return
-	}
+	var (
+		newOrder  bl.CreateOrder
+		isManager bool
+	)
 
-	newOrder := bl.CreateOrder{
+	newOrder = bl.CreateOrder{
 		StartAt:        h.input.StartAt,
 		OwnerID:        userPayload.UserId,
-		PointsID:       pointIDs,
+		Points:         h.input.Points,
 		Helpers:        h.input.Helpers,
 		Comment:        h.input.Comment,
 		IsFragileCargo: h.input.IsFragileCargo,
 	}
-	isManager := userPayload.RoleId == int(bl.Manager)
-	if err = h.Storage.OrderStorage().CreateOrder(newOrder, isManager); err != nil {
+	isManager = userPayload.RoleId == int(bl.Manager)
+	if h.result.OrderID, err = h.Storage.OrderStorage().CreateOrder(newOrder, isManager); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
 
-	core.SendResponse(201, nil, ctx)
+	core.SendResponse(201, h.result, ctx)
 }
