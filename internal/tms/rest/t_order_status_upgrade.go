@@ -42,7 +42,7 @@ func (h *OrderStatusUpgradeHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if int(managerId.Int64) != userPayload.UserId {
+	if managerId != int64(userPayload.UserId) {
 		core.ErrorLog(403, "Forbidden", errors.New("invalid manager id"), ctx)
 		return
 	}

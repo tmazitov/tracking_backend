@@ -20,6 +20,8 @@ type OrderPutHandler struct {
 func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 
 	var (
+		orderOwnerId         int64
+		orderStatus          bl.OrderStatus
 		updatedOrderPointsID []int64
 		originalPointsID     []int64
 		orderId              int
@@ -48,13 +50,33 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
+	// Check order owner
+	orderOwnerId, err = h.Storage.OrderStorage().OrderGetOwnerID(orderId)
+	if err != nil {
+		core.ErrorLog(500, "Internal server error", err, ctx)
+		return
+	}
+	if int64(userPayload.UserId) != orderOwnerId {
+		core.ErrorLog(403, "Forbidden", errors.New("invalid user id to update order"), ctx)
+		return
+	}
+
+	// Check order status
+	orderStatus, err = h.Storage.OrderStorage().OrderGetStatus(orderId)
+	if err != nil {
+		core.ErrorLog(500, "Internal server error", err, ctx)
+		return
+	}
+	if orderStatus == bl.OrderCanceled || orderStatus == bl.OrderDone {
+		core.ErrorLog(403, "Forbidden", errors.New("invalid user id to update order"), ctx)
+		return
+	}
+
 	// Update basic info about the order (without points ID)
 	if originalPointsID, err = h.Storage.OrderStorage().OrderGetPointsID(orderId); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
-
-	fmt.Println("order updated")
 
 	// Sort points on groups: to create, update, delete and make appropriate changes to points
 	// Will return the array of points id which have relationship with current order
@@ -63,7 +85,6 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("points updated")
 	// Update the points ID in the order record
 	if err = h.Storage.OrderStorage().OrderUpdate(orderId, bl.DB_EditableOrder{
 		StartAt:        h.input.StartAt,
@@ -129,9 +150,9 @@ func (h *OrderPutHandler) updatePoints(orderID int, originalPointsID []int64, ne
 		}
 	}
 
-	fmt.Println("points to create: ", pointsToCreate)
-	fmt.Println("points to update: ", pointsToUpdate)
-	fmt.Println("points to delete: ", pointsToDelete)
+	// fmt.Println("points to create: ", pointsToCreate)
+	// fmt.Println("points to update: ", pointsToUpdate)
+	// fmt.Println("points to delete: ", pointsToDelete)
 
 	if len(pointsToUpdate) > 0 {
 		if updatedOrderPointsID, err = h.Storage.OrderStorage().PointsUpdate(pointsToUpdate); err != nil {
@@ -154,6 +175,5 @@ func (h *OrderPutHandler) updatePoints(orderID int, originalPointsID []int64, ne
 	}
 
 	updatedOrderPointsID = append(updatedOrderPointsID, createdPointsID...)
-	fmt.Println("total points id: ", updatedOrderPointsID)
 	return updatedOrderPointsID, nil
 }
