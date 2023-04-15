@@ -44,6 +44,11 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
+	if len(h.input.Points) < 2 || len(h.input.Points) > 100 {
+		core.ErrorLog(400, "Bad request", errors.New("count of points is not valid"), ctx)
+		return
+	}
+
 	orderId, err = strconv.Atoi(ctx.Param("orderId"))
 	if err != nil || orderId <= 0 {
 		core.ErrorLog(400, "Bad request", errors.New("upgrade order status: order_id is invalid"), ctx)

@@ -30,8 +30,18 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.BindJSON(&h.input); err != nil {
+	if err := ctx.ShouldBindJSON(&h.input); err != nil {
 		core.ErrorLog(400, "Bad request", err, ctx)
+		return
+	}
+
+	if len(h.input.Points) < 2 || len(h.input.Points) > 100 {
+		core.ErrorLog(400, "Bad request", errors.New("count of points is not valid"), ctx)
+		return
+	}
+
+	if h.input.OrderType > 6 {
+		core.ErrorLog(400, "Bad request", errors.New("order type is greater than 6"), ctx)
 		return
 	}
 
@@ -40,15 +50,23 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		isManager bool
 	)
 
-	newOrder = bl.CreateOrder{
-		StartAt:        h.input.StartAt,
-		OwnerID:        userPayload.UserId,
-		Points:         h.input.Points,
-		Helpers:        h.input.Helpers,
-		Comment:        h.input.Comment,
-		IsFragileCargo: h.input.IsFragileCargo,
+	if h.input.Title == "" {
+		h.input.Title = h.input.Points[0].Title
 	}
-	isManager = userPayload.RoleId == int(bl.Manager)
+
+	newOrder = bl.CreateOrder{
+		OwnerID:           userPayload.UserId,
+		WorkerID:          h.input.WorkerID,
+		StartAt:           h.input.StartAt,
+		Title:             h.input.Title,
+		Points:            h.input.Points,
+		OrderType:         h.input.OrderType,
+		Helpers:           h.input.Helpers,
+		Comment:           h.input.Comment,
+		IsFragileCargo:    h.input.IsFragileCargo,
+		IsRegularCustomer: h.input.IsRegularCustomer,
+	}
+	isManager = userPayload.RoleId == int(bl.Manager) || userPayload.RoleId == int(bl.Admin)
 	if h.result.OrderID, err = h.Storage.OrderStorage().CreateOrder(newOrder, isManager); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return

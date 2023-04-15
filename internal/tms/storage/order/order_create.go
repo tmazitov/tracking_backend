@@ -102,16 +102,18 @@ func getUserExecParts(order bl.CreateOrder, pointsID []int64) (string, []interfa
 		start_at,
 		owner_id,
 		points_id, 
+		title,
 		helpers, 
 		comment_message, 
 		is_fragile_cargo
 	) 
-	VALUES ($1, $2, $3, $4, $5, $6)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	RETURNING id`
 	return execString, []interface{}{
 		order.StartAt,
 		order.OwnerID,
 		pq.Int64Array(pointsID),
+		order.Title,
 		order.Helpers,
 		order.Comment,
 		order.IsFragileCargo,
@@ -124,20 +126,27 @@ func getManagerExecParts(order bl.CreateOrder, pointsID []int64) (string, []inte
 		start_at,
 		owner_id,
 		manager_id,
+		worker_id,
+		title,
 		points_id, 
 		helpers, 
 		comment_message, 
-		is_fragile_cargo
+		is_fragile_cargo,
+		is_regular_customer
 	) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	RETURNING id`
+	fmt.Println(order.WorkerID)
 	return execString, []interface{}{
 		order.StartAt,
 		order.OwnerID,
 		order.OwnerID,
+		sql.NullInt64{Int64: order.WorkerID, Valid: order.WorkerID != 0},
+		order.Title,
 		pq.Int64Array(pointsID),
 		order.Helpers,
 		order.Comment,
 		order.IsFragileCargo,
+		order.IsRegularCustomer,
 	}
 }

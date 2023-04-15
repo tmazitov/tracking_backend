@@ -7,15 +7,6 @@ import (
 	"github.com/lib/pq"
 )
 
-type CreateOrder struct {
-	StartAt        time.Time
-	OwnerID        int
-	Points         []Point
-	Helpers        uint8
-	Comment        string
-	IsFragileCargo bool
-}
-
 type OrderStatus int
 
 const (
@@ -64,25 +55,46 @@ type DB_OrderListItem struct {
 }
 
 type R_CreatableOrder struct {
-	StartAt        time.Time `json:"startAt" validate:"max=32"`
-	Points         []Point   `json:"points"`
-	Helpers        uint8     `json:"helpers,omitempty"`
-	Comment        string    `json:"comment,omitempty" validate:"max=256"`
-	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
+	Points            []Point   `json:"points"  binding:"required" validate:"dive"`
+	Title             string    `json:"title,omitempty"   validate:"max=64"`
+	WorkerID          int64     `json:"workerId,omitempty"`
+	Helpers           uint8     `json:"helpers,omitempty"`
+	OrderType         uint8     `json:"orderType,omitempty"`
+	Comment           string    `json:"comment,omitempty" validate:"max=256"`
+	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
+	IsRegularCustomer bool      `json:"isRegularCustomer,omitempty"`
+}
+
+type CreateOrder struct {
+	OwnerID           int
+	WorkerID          int64
+	StartAt           time.Time
+	Title             string
+	Points            []Point
+	Helpers           uint8
+	OrderType         uint8
+	Comment           string
+	IsFragileCargo    bool
+	IsRegularCustomer bool
 }
 
 type R_EditableOrder struct {
-	StartAt        time.Time `json:"startAt" validate:"max=32"`
-	Points         []Point   `json:"points"`
-	Helpers        uint8     `json:"helpers" validate:"max=32""`
-	Comment        string    `json:"comment,omitempty" validate:"max=256"`
-	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
+	Points            []Point   `json:"points"  binding:"required" validate:"dive"`
+	Title             string    `json:"title,omitempty"   validate:"max=64"`
+	WorkerID          int64     `json:"workerId,omitempty"`
+	Helpers           uint8     `json:"helpers,omitempty"`
+	OrderType         uint8     `json:"orderType,omitempty"`
+	Comment           string    `json:"comment,omitempty" validate:"max=256"`
+	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
+	IsRegularCustomer bool      `json:"isRegularCustomer,omitempty"`
 }
 
 type DB_EditableOrder struct {
 	StartAt        time.Time `json:"startAt" validate:"max=32"`
 	PointsID       []int64   `json:"points"`
-	Helpers        uint8     `json:"helpers" validate:"max=32""`
+	Helpers        uint8     `json:"helpers"`
 	Comment        string    `json:"comment,omitempty" validate:"max=256"`
 	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
 }

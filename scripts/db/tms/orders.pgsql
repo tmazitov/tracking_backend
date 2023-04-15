@@ -19,6 +19,8 @@ CREATE TABLE orders (
 	worker_id			BIGINT,
 	manager_id			BIGINT,
 
+    title               VARCHAR(64) NOT NULL,
+
     start_at            TIMESTAMP	NOT NULL,
     end_at              TIMESTAMP 	DEFAULT NULL,
 
@@ -27,7 +29,9 @@ CREATE TABLE orders (
     helpers             INT 		NOT NULL DEFAULT 0,
     comment_message     VARCHAR(256) NOT NULL DEFAULT '', 
     is_fragile_cargo    BOOLEAN 	NOT NULL DEFAULT FALSE,
+    is_regular_customer BOOLEAN     NOT NULL DEFAULT FALSE,
 
+    canceled_a          TIMESTAMP            DEFAULT NULL,
     created_at			TIMESTAMP   NOT NULL DEFAULT NOW(),
     edited_at 			TIMESTAMP	NOT NULL DEFAULT NOW(),
 
