@@ -11,7 +11,7 @@ type UserPutHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
 	input   struct {
-		ShortName string `json:"shortName" validate:"max=64"`
+		ShortName string `json:"shortName" validate:"max=32"`
 	}
 }
 

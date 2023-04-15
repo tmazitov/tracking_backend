@@ -26,6 +26,14 @@ const (
 	OrderDone      OrderStatus = 4
 )
 
+type OrderType int
+
+const (
+	OrderInCity        OrderType = 1
+	OrderInNearOfCity  OrderType = 2
+	OrderInBetweenCity OrderType = 3
+)
+
 type R_OrderListItem struct {
 	ID             int64     `json:"orderId"`
 	StartAt        time.Time `json:"startAt"`

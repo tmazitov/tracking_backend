@@ -13,8 +13,8 @@ type AuthUserTakeCode struct {
 	Jwt       *jwt.JwtStorage
 	Conductor *conductor.Conductor
 	input     struct {
-		Token string
-		Code  string
+		Token string `json:"token"`
+		Code  string `json:"code"`
 	}
 	result struct {
 		Access  string `json:"access"`

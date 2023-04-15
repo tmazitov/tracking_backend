@@ -13,7 +13,7 @@ const (
 
 type GetUser struct {
 	TelNumber string   `json:"telNumber"`
-	ShortName string   `json:"shotName"`
+	ShortName string   `json:"shortName"`
 	RoleID    UserRole `json:"roleId"`
 }
 
