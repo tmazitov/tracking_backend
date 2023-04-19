@@ -4,7 +4,7 @@ CREATE TABLE points (
     id          BIGINT  GENERATED ALWAYS AS IDENTITY UNIQUE,
     step_id     INT2                NOT NULL,
     floor       INT8                NOT NULL DEFAULT 1,
-    title       VARCHAR(36)         NOT NULL,
+    title       VARCHAR(256)         NOT NULL,
     point       geography(POINT)    NOT NULL,
     PRIMARY KEY(id)
 );
@@ -19,7 +19,7 @@ CREATE TABLE orders (
 	worker_id			BIGINT,
 	manager_id			BIGINT,
 
-    title               VARCHAR(64) NOT NULL,
+    title               VARCHAR(256) NOT NULL,
 
     start_at            TIMESTAMP	NOT NULL,
     end_at              TIMESTAMP 	DEFAULT NULL,

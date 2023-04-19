@@ -10,7 +10,7 @@ import (
 type UserGetHandler struct {
 	Jwt     jwt.JwtStorage
 	Storage bl.Storage
-	result  bl.GetUser
+	result  bl.R_GetUser
 }
 
 func (h *UserGetHandler) Handle(ctx *gin.Context) {
@@ -26,7 +26,7 @@ func (h *UserGetHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	h.result = bl.GetUser{
+	h.result = bl.R_GetUser{
 		TelNumber: userInfo.TelNumber.String,
 		ShortName: userInfo.ShortName.String,
 		RoleID:    userInfo.RoleID,

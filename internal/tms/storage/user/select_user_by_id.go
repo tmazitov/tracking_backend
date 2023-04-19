@@ -6,13 +6,13 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) GetUserInfo(userId int) (bl.SelectUserById, error) {
+func (s *Storage) GetUserInfo(userId int) (bl.DB_GetUser, error) {
 	var (
-		result bl.SelectUserById
+		result bl.DB_GetUser
 		err    error
 	)
 
-	result = bl.SelectUserById{}
+	result = bl.DB_GetUser{}
 	conn, err := s.repo.Conn()
 	if err != nil {
 		return result, errors.New("DB conn error: " + err.Error())

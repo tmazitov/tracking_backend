@@ -26,32 +26,36 @@ const (
 )
 
 type R_OrderListItem struct {
-	ID             int64     `json:"orderId"`
-	StartAt        time.Time `json:"startAt"`
-	EndAt          time.Time `json:"endAt,omitempty"`
-	StatusID       int       `json:"statusId"`
-	Points         []Point   `json:"points"`
-	OwnerID        int       `json:"owner_id,omitempty"`
-	WorkerID       int       `json:"worker_id,omitempty"`
-	ManagerID      int       `json:"manager_id,omitempty"`
-	Helpers        uint8     `json:"helpers,omitempty"`
-	Comment        string    `json:"comment,omitempty"`
-	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+	ID                int64     `json:"orderId"`
+	Title             string    `json:"title"`
+	StartAt           time.Time `json:"startAt"`
+	EndAt             time.Time `json:"endAt,omitempty"`
+	StatusID          int       `json:"statusId"`
+	Points            []Point   `json:"points"`
+	OwnerID           int       `json:"owner_id,omitempty"`
+	WorkerID          int       `json:"worker_id,omitempty"`
+	ManagerID         int       `json:"manager_id,omitempty"`
+	Helpers           uint8     `json:"helpers,omitempty"`
+	Comment           string    `json:"comment,omitempty"`
+	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
+	IsRegularCustomer bool      `json:"isRegularCustomer,omitempty"`
 }
 
 type DB_OrderListItem struct {
-	ID             int64
-	CreatedAt      time.Time
-	StartAt        time.Time
-	EndAt          sql.NullTime
-	StatusID       int
-	PointsID       pq.Int64Array
-	OwnerID        int
-	WorkerID       sql.NullInt64
-	ManagerID      sql.NullInt64
-	Helpers        sql.NullInt16
-	Comment        sql.NullString
-	IsFragileCargo bool
+	ID                int64
+	CreatedAt         time.Time
+	Title             string
+	StartAt           time.Time
+	EndAt             sql.NullTime
+	StatusID          int
+	PointsID          pq.Int64Array
+	OwnerID           int
+	WorkerID          sql.NullInt64
+	ManagerID         sql.NullInt64
+	Helpers           sql.NullInt16
+	Comment           sql.NullString
+	IsFragileCargo    bool
+	IsRegularCustomer bool
 }
 
 type R_CreatableOrder struct {

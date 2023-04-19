@@ -26,6 +26,7 @@ func (s *Storage) OrderList(userId int, roleId int) ([]bl.DB_OrderListItem, erro
 		ord := bl.DB_OrderListItem{}
 		err := rows.Scan(
 			&ord.ID,
+			&ord.Title,
 			&ord.CreatedAt,
 			&ord.StartAt,
 			&ord.EndAt,
@@ -37,6 +38,7 @@ func (s *Storage) OrderList(userId int, roleId int) ([]bl.DB_OrderListItem, erro
 			&ord.Helpers,
 			&ord.Comment,
 			&ord.IsFragileCargo,
+			&ord.IsRegularCustomer,
 		)
 		if err != nil {
 			return nil, errors.New("DB read error: " + err.Error())
@@ -56,6 +58,7 @@ func (s *Storage) orderList(userId int, roleFieldName string) (*sql.Rows, error)
 
 	execString := `SELECT      		
 		id,
+		title,
 		created_at,
 		start_at,       
 		end_at,
@@ -66,7 +69,8 @@ func (s *Storage) orderList(userId int, roleFieldName string) (*sql.Rows, error)
 		points_id,
 		helpers,
 		comment_message,
-		is_fragile_cargo
+		is_fragile_cargo,
+		is_regular_customer
 	FROM orders`
 
 	if roleFieldName == "" {

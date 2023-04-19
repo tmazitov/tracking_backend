@@ -16,7 +16,8 @@ type OrderStorage interface {
 }
 
 type UserStorage interface {
-	GetUserInfo(userId int) (SelectUserById, error)
+	UserGetStaffList() ([]DB_GetUser, error)
+	GetUserInfo(userId int) (DB_GetUser, error)
 	UpdateUserShortName(userId int, shortName string) error
 }
 

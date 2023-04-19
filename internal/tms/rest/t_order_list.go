@@ -48,17 +48,19 @@ func getOrderList(userId int, roleId int, storage bl.Storage) ([]bl.R_OrderListI
 		}
 
 		result_item := bl.R_OrderListItem{
-			ID:             order.ID,
-			StartAt:        order.StartAt,
-			EndAt:          order.EndAt.Time,
-			StatusID:       order.StatusID,
-			Points:         points,
-			OwnerID:        order.OwnerID,
-			WorkerID:       int(order.WorkerID.Int64),
-			ManagerID:      int(order.ManagerID.Int64),
-			Helpers:        uint8(order.Helpers.Int16),
-			Comment:        order.Comment.String,
-			IsFragileCargo: order.IsFragileCargo,
+			ID:                order.ID,
+			Title:             order.Title,
+			StartAt:           order.StartAt,
+			EndAt:             order.EndAt.Time,
+			StatusID:          order.StatusID,
+			Points:            points,
+			OwnerID:           order.OwnerID,
+			WorkerID:          int(order.WorkerID.Int64),
+			ManagerID:         int(order.ManagerID.Int64),
+			Helpers:           uint8(order.Helpers.Int16),
+			Comment:           order.Comment.String,
+			IsFragileCargo:    order.IsFragileCargo,
+			IsRegularCustomer: order.IsRegularCustomer,
 		}
 		result = append(result, result_item)
 	}

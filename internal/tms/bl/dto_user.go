@@ -11,19 +11,21 @@ const (
 	Admin   UserRole = 3
 )
 
-type GetUser struct {
+type R_GetUser struct {
+	ID        int64    `json:"id,omitempty"`
 	TelNumber string   `json:"telNumber"`
 	ShortName string   `json:"shortName"`
 	RoleID    UserRole `json:"roleId"`
 }
 
-type PutUser struct {
-	TelNumber string `json:"telNumber"`
-	ShortName string `json:"shotName"`
-}
-
-type SelectUserById struct {
+type DB_GetUser struct {
+	ID        int64
 	TelNumber sql.NullString
 	ShortName sql.NullString
 	RoleID    UserRole
+}
+
+type PutUser struct {
+	TelNumber string `json:"telNumber"`
+	ShortName string `json:"shotName"`
 }
