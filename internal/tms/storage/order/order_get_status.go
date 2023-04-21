@@ -6,7 +6,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) OrderGetStatus(orderId int) (bl.OrderStatus, error) {
+func (s *Storage) OrderGetStatus(orderId int64) (bl.OrderStatus, error) {
 	var (
 		execString  string
 		orderStatus bl.OrderStatus

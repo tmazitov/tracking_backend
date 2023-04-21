@@ -52,7 +52,7 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 	}
 
 	var (
-		userId int
+		userId int64
 		roleId int
 	)
 	userId, roleId, err = h.createUserIfNotExists(payload.Email)
@@ -80,7 +80,7 @@ func (h *AuthUserTakeCode) Handle(ctx *gin.Context) {
 	core.SendResponse(201, h.result, ctx)
 }
 
-func (h *AuthUserTakeCode) createUserIfNotExists(email string) (int, int, error) {
+func (h *AuthUserTakeCode) createUserIfNotExists(email string) (int64, int, error) {
 	var (
 		err error
 	)

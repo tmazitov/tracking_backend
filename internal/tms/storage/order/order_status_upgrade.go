@@ -2,7 +2,7 @@ package order
 
 import "errors"
 
-func (s *Storage) OrderStatusUpgrade(orderId int) (int, error) {
+func (s *Storage) OrderStatusUpgrade(orderId int64) (int, error) {
 	conn, err := s.repo.Conn()
 	if err != nil {
 		return 0, errors.New("DB conn error: " + err.Error())

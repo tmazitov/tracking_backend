@@ -4,11 +4,11 @@ import (
 	"errors"
 )
 
-func (s *Storage) CheckUserByEmail(email string) (int, int, error) {
+func (s *Storage) CheckUserByEmail(email string) (int64, int, error) {
 
 	var (
 		// result []int
-		userId int
+		userId int64
 		roleId int
 	)
 

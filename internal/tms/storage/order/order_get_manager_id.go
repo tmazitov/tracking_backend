@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-func (s *Storage) OrderGetManagerID(orderId int) (int64, error) {
+func (s *Storage) OrderGetManagerID(orderId int64) (int64, error) {
 
 	var (
 		execString     string

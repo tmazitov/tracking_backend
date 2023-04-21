@@ -10,9 +10,8 @@ import (
 type OrderListHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
-	// input   struct {
-	// }
-	result []bl.R_OrderListItem
+	input   bl.R_OrderListFilters
+	result  []bl.R_OrderListItem
 }
 
 func (h *OrderListHandler) Handle(ctx *gin.Context) {
@@ -22,7 +21,12 @@ func (h *OrderListHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if h.result, err = getOrderList(userPayload.UserId, userPayload.RoleId, h.Storage); err != nil {
+	if err := ctx.ShouldBindJSON(&h.input); err != nil {
+		core.ErrorLog(400, "Bad request", err, ctx)
+		return
+	}
+
+	if h.result, err = getOrderList(userPayload.UserId, userPayload.RoleId, h.input, h.Storage); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
@@ -30,14 +34,14 @@ func (h *OrderListHandler) Handle(ctx *gin.Context) {
 	core.SendResponse(200, h.result, ctx)
 }
 
-func getOrderList(userId int, roleId int, storage bl.Storage) ([]bl.R_OrderListItem, error) {
+func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, storage bl.Storage) ([]bl.R_OrderListItem, error) {
 	var (
 		orders []bl.DB_OrderListItem
 		result []bl.R_OrderListItem
 		err    error
 	)
 
-	if orders, err = storage.OrderStorage().OrderList(userId, roleId); err != nil {
+	if orders, err = storage.OrderStorage().OrderList(userId, roleId, filters); err != nil {
 		return result, err
 	}
 
@@ -55,8 +59,8 @@ func getOrderList(userId int, roleId int, storage bl.Storage) ([]bl.R_OrderListI
 			StatusID:          order.StatusID,
 			Points:            points,
 			OwnerID:           order.OwnerID,
-			WorkerID:          int(order.WorkerID.Int64),
-			ManagerID:         int(order.ManagerID.Int64),
+			WorkerID:          order.WorkerID.Int64,
+			ManagerID:         order.ManagerID.Int64,
 			Helpers:           uint8(order.Helpers.Int16),
 			Comment:           order.Comment.String,
 			IsFragileCargo:    order.IsFragileCargo,

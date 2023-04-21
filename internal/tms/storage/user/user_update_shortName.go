@@ -2,7 +2,7 @@ package user
 
 import "errors"
 
-func (s *Storage) UpdateUserShortName(userId int, shortName string) error {
+func (s *Storage) UpdateUserShortName(userId int64, shortName string) error {
 	conn, err := s.repo.Conn()
 	if err != nil {
 		return errors.New("DB conn error: " + err.Error())

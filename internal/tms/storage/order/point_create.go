@@ -8,7 +8,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) PointsCreate(orderID int, points []bl.Point) ([]int64, error) {
+func (s *Storage) PointsCreate(orderID int64, points []bl.Point) ([]int64, error) {
 
 	conn, err := s.gis.Conn()
 	if err != nil {

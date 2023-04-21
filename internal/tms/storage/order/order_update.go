@@ -7,7 +7,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) OrderUpdate(orderId int, info bl.DB_EditableOrder) error {
+func (s *Storage) OrderUpdate(orderId int64, info bl.DB_EditableOrder) error {
 	var (
 		err error
 	)

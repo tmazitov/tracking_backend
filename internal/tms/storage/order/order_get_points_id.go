@@ -6,7 +6,7 @@ import (
 	"github.com/lib/pq"
 )
 
-func (s *Storage) OrderGetPointsID(orderId int) ([]int64, error) {
+func (s *Storage) OrderGetPointsID(orderId int64) ([]int64, error) {
 
 	var (
 		execString string

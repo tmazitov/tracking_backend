@@ -30,7 +30,7 @@ func (h *OrderStatusUpgradeHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	orderId, err := strconv.Atoi(ctx.Param("orderId"))
+	orderId, err := strconv.ParseInt(ctx.Param("orderId"), 10, 64)
 	if err != nil || orderId <= 0 {
 		core.ErrorLog(400, "Bad request", errors.New("upgrade order status: order_id is invalid"), ctx)
 		return

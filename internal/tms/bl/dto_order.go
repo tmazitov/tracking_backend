@@ -10,11 +10,11 @@ import (
 type OrderStatus int
 
 const (
-	OrderCanceled  OrderStatus = 0
-	OrderCreated   OrderStatus = 1
-	OrderAccepted  OrderStatus = 2
-	OrderInProcess OrderStatus = 3
-	OrderDone      OrderStatus = 4
+	OrderCanceled  OrderStatus = 1
+	OrderCreated   OrderStatus = 2
+	OrderAccepted  OrderStatus = 3
+	OrderInProcess OrderStatus = 4
+	OrderDone      OrderStatus = 5
 )
 
 type OrderType int
@@ -25,6 +25,17 @@ const (
 	OrderInBetweenCity OrderType = 3
 )
 
+const DB_OrderListRowCount uint = 15
+
+type R_OrderListFilters struct {
+	Date              time.Time   `json:"date" binding:"required" validate:"max=32"`
+	Page              uint        `json:"page_number"`
+	WorkerId          int64       `json:"worker_id"`
+	StatusID          OrderStatus `json:"statusId"`
+	TypeId            OrderType   `json:"typeId"`
+	IsRegularCustomer bool        `json:"isRegularCustomer"`
+}
+
 type R_OrderListItem struct {
 	ID                int64     `json:"orderId"`
 	Title             string    `json:"title"`
@@ -32,9 +43,10 @@ type R_OrderListItem struct {
 	EndAt             time.Time `json:"endAt,omitempty"`
 	StatusID          int       `json:"statusId"`
 	Points            []Point   `json:"points"`
-	OwnerID           int       `json:"owner_id,omitempty"`
-	WorkerID          int       `json:"worker_id,omitempty"`
-	ManagerID         int       `json:"manager_id,omitempty"`
+	OrderType         uint8     `json:"orderType,omitempty"`
+	OwnerID           int64     `json:"owner_id,omitempty"`
+	WorkerID          int64     `json:"worker_id,omitempty"`
+	ManagerID         int64     `json:"manager_id,omitempty"`
 	Helpers           uint8     `json:"helpers,omitempty"`
 	Comment           string    `json:"comment,omitempty"`
 	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
@@ -48,8 +60,9 @@ type DB_OrderListItem struct {
 	StartAt           time.Time
 	EndAt             sql.NullTime
 	StatusID          int
+	OrderType         uint8
 	PointsID          pq.Int64Array
-	OwnerID           int
+	OwnerID           int64
 	WorkerID          sql.NullInt64
 	ManagerID         sql.NullInt64
 	Helpers           sql.NullInt16
@@ -71,7 +84,7 @@ type R_CreatableOrder struct {
 }
 
 type CreateOrder struct {
-	OwnerID           int
+	OwnerID           int64
 	WorkerID          int64
 	StartAt           time.Time
 	Title             string

@@ -4,10 +4,10 @@ import (
 	"errors"
 )
 
-func (s *Storage) CreateUser(email string) (int, error) {
+func (s *Storage) CreateUser(email string) (int64, error) {
 
 	var (
-		result int
+		userId int64
 	)
 
 	conn, err := s.repo.Conn()
@@ -21,8 +21,8 @@ func (s *Storage) CreateUser(email string) (int, error) {
 		VALUES ( $1 )
 		RETURNING id`
 
-	if err := conn.QueryRow(execString, email).Scan(&result); err != nil {
+	if err := conn.QueryRow(execString, email).Scan(&userId); err != nil {
 		return 0, errors.New("DB exec error: " + err.Error())
 	}
-	return result, nil
+	return userId, nil
 }

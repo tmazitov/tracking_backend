@@ -6,7 +6,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) GetUserInfo(userId int) (bl.DB_GetUser, error) {
+func (s *Storage) GetUserInfo(userId int64) (bl.DB_GetUser, error) {
 	var (
 		result bl.DB_GetUser
 		err    error

@@ -24,7 +24,7 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		orderStatus          bl.OrderStatus
 		updatedOrderPointsID []int64
 		originalPointsID     []int64
-		orderId              int
+		orderId              int64
 		err                  error
 	)
 
@@ -49,7 +49,7 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	orderId, err = strconv.Atoi(ctx.Param("orderId"))
+	orderId, err = strconv.ParseInt(ctx.Param("orderId"), 10, 64)
 	if err != nil || orderId <= 0 {
 		core.ErrorLog(400, "Bad request", errors.New("upgrade order status: order_id is invalid"), ctx)
 		return
@@ -105,7 +105,7 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 	core.SendResponse(200, nil, ctx)
 }
 
-func (h *OrderPutHandler) updatePoints(orderID int, originalPointsID []int64, newPointsData []bl.Point) ([]int64, error) {
+func (h *OrderPutHandler) updatePoints(orderID int64, originalPointsID []int64, newPointsData []bl.Point) ([]int64, error) {
 	var (
 		err                  error
 		idIsFound            bool
