@@ -1,6 +1,11 @@
 package rest
 
 import (
+	"errors"
+	"net/url"
+	"strconv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
@@ -10,7 +15,7 @@ import (
 type OrderListHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
-	input   bl.R_OrderListFilters
+	params  bl.R_OrderListFilters
 	result  []bl.R_OrderListItem
 }
 
@@ -21,12 +26,13 @@ func (h *OrderListHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.ShouldBindJSON(&h.input); err != nil {
+	h.params, err = fillFiltersByParams(ctx)
+	if err != nil {
 		core.ErrorLog(400, "Bad request", err, ctx)
 		return
 	}
 
-	if h.result, err = getOrderList(userPayload.UserId, userPayload.RoleId, h.input, h.Storage); err != nil {
+	if h.result, err = getOrderList(userPayload.UserId, userPayload.RoleId, h.params, h.Storage); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
@@ -37,7 +43,7 @@ func (h *OrderListHandler) Handle(ctx *gin.Context) {
 func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, storage bl.Storage) ([]bl.R_OrderListItem, error) {
 	var (
 		orders []bl.DB_OrderListItem
-		result []bl.R_OrderListItem
+		result []bl.R_OrderListItem = []bl.R_OrderListItem{}
 		err    error
 	)
 
@@ -70,4 +76,58 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 	}
 
 	return result, err
+}
+
+func fillFiltersByParams(ctx *gin.Context) (bl.R_OrderListFilters, error) {
+	var (
+		filters bl.R_OrderListFilters = bl.R_OrderListFilters{}
+		params  url.Values            = ctx.Request.URL.Query()
+		err     error
+	)
+
+	if !params.Has("d") {
+		return filters, errors.New("date is not defined in query")
+	}
+	filters.Date, err = time.Parse("2006-01-02", params.Get("d"))
+	if err != nil {
+		return filters, errors.New("invalid date parameter")
+	}
+
+	if params.Has("p") {
+		value, err := strconv.ParseUint(params.Get("p"), 10, 32)
+		if err != nil {
+			return filters, errors.New("invalid page parameter")
+		}
+		filters.Page = uint(value)
+	}
+
+	if params.Has("w") {
+		filters.WorkerId, err = strconv.ParseInt(params.Get("w"), 10, 32)
+		if err != nil {
+			return filters, errors.New("invalid worker_id parameter")
+		}
+	}
+
+	if params.Has("s") {
+		value, err := strconv.Atoi(params.Get("s"))
+		if err != nil {
+			return filters, errors.New("invalid status_id parameter")
+		}
+		filters.StatusID = bl.OrderStatus(value)
+
+	}
+
+	if params.Has("t") {
+		value, err := strconv.Atoi(params.Get("t"))
+		if err != nil {
+			return filters, errors.New("invalid type_id parameter")
+		}
+		filters.TypeId = bl.OrderType(value)
+	}
+
+	if params.Has("is_reg") {
+		filters.IsRegularCustomer = true
+	}
+
+	return filters, nil
 }
