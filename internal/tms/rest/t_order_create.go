@@ -46,8 +46,7 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 	}
 
 	var (
-		newOrder  bl.CreateOrder
-		isManager bool
+		newOrder bl.CreateOrder
 	)
 
 	if h.input.Title == "" {
@@ -66,8 +65,7 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		IsFragileCargo:    h.input.IsFragileCargo,
 		IsRegularCustomer: h.input.IsRegularCustomer,
 	}
-	isManager = userPayload.RoleId == int(bl.Manager) || userPayload.RoleId == int(bl.Admin)
-	if h.result.OrderID, err = h.Storage.OrderStorage().CreateOrder(newOrder, isManager); err != nil {
+	if h.result.OrderID, err = h.Storage.OrderStorage().CreateOrder(newOrder, bl.UserRole(userPayload.RoleId)); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}

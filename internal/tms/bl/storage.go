@@ -8,7 +8,7 @@ type OrderStorage interface {
 	OrderGetStatus(orderId int64) (OrderStatus, error)
 	OrderUpdate(orderId int64, info DB_EditableOrder) error
 	OrderStatusUpgrade(orderId int64) (int, error)
-	CreateOrder(order CreateOrder, isManager bool) (int64, error)
+	CreateOrder(order CreateOrder, role UserRole) (int64, error)
 	PointsCreate(orderID int64, points []Point) ([]int64, error)
 	PointsUpdate(points []Point) ([]int64, error)
 	PointsDelete(pointsID []int64) error

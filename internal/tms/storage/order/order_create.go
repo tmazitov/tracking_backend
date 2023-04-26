@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/lib/pq"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) (int64, error) {
+func (s *Storage) CreateOrder(order bl.CreateOrder, role bl.UserRole) (int64, error) {
 
 	var (
 		orderToPointValues  []interface{}
@@ -18,7 +19,6 @@ func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) (int64, erro
 		pointsID            []int64
 		orderID             int64
 		execString          string
-		orderValues         []interface{}
 		tx                  *sql.Tx
 	)
 
@@ -59,13 +59,20 @@ func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) (int64, erro
 	}
 
 	// Create new order and get the new order id
-	if isManager {
-		execString, orderValues = getManagerExecParts(order, pointsID)
-	} else {
-		execString, orderValues = getUserExecParts(order, pointsID)
-	}
+	var (
+		queryString            string
+		queryFieldsSpotsString string
+		queryFieldsString      string
+		queryFieldsValues      []interface{}
+	)
 
-	if err = tx.QueryRow(execString, orderValues...).Scan(&orderID); err != nil {
+	queryFieldsString, queryFieldsSpotsString, queryFieldsValues = getQueryItems(role, order, pointsID)
+
+	queryString = fmt.Sprintf(`INSERT INTO orders ( %s ) 
+	VALUES ( %s )
+	RETURNING id`, queryFieldsString, queryFieldsSpotsString)
+
+	if err = tx.QueryRow(queryString, queryFieldsValues...).Scan(&orderID); err != nil {
 		tx.Rollback()
 		return 0, errors.New("DB exec error: " + err.Error())
 	}
@@ -96,57 +103,45 @@ func (s *Storage) CreateOrder(order bl.CreateOrder, isManager bool) (int64, erro
 	return orderID, nil
 }
 
-func getUserExecParts(order bl.CreateOrder, pointsID []int64) (string, []interface{}) {
-	execString := `INSERT INTO orders 
-	(
-		start_at,
-		owner_id,
-		points_id, 
-		title,
-		helpers, 
-		comment_message, 
-		is_fragile_cargo
-	) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7)
-	RETURNING id`
-	return execString, []interface{}{
-		order.StartAt,
-		order.OwnerID,
-		pq.Int64Array(pointsID),
-		order.Title,
-		order.Helpers,
-		order.Comment,
-		order.IsFragileCargo,
-	}
-}
+func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (string, string, []interface{}) {
+	var (
+		querySpots  []string
+		queryFields []string
+		queryItems  []interface{}
+	)
 
-func getManagerExecParts(order bl.CreateOrder, pointsID []int64) (string, []interface{}) {
-	execString := `INSERT INTO orders 
-	(
-		start_at,
-		owner_id,
-		manager_id,
-		worker_id,
-		title,
-		points_id, 
-		helpers, 
-		comment_message, 
-		is_fragile_cargo,
-		is_regular_customer
-	) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-	RETURNING id`
-	fmt.Println(order.WorkerID)
-	return execString, []interface{}{
+	queryFields = []string{
+		"start_at",
+		"owner_id",
+		"points_id",
+		"title",
+		"helpers",
+		"comment_message",
+		"is_fragile_cargo",
+	}
+
+	queryItems = []interface{}{
 		order.StartAt,
 		order.OwnerID,
-		order.OwnerID,
-		sql.NullInt64{Int64: order.WorkerID, Valid: order.WorkerID != 0},
-		order.Title,
 		pq.Int64Array(pointsID),
+		order.Title,
 		order.Helpers,
 		order.Comment,
 		order.IsFragileCargo,
-		order.IsRegularCustomer,
 	}
+
+	querySpots = []string{"$1", "$2", "$3", "$4", "$5", "$6", "$7"}
+
+	if role == bl.Admin || role == bl.Manager {
+		queryFields = append(queryFields, "worker_id", "is_regular_customer", "manager_id")
+		queryItems = append(queryItems, order.WorkerID, order.IsRegularCustomer, order.OwnerID)
+		querySpots = append(querySpots, "$8", "$9", "$10")
+		if order.WorkerID != 0 {
+			queryFields = append(queryFields, "status_id")
+			queryItems = append(queryItems, 3)
+			querySpots = append(querySpots, "$11")
+		}
+	}
+
+	return strings.Join(queryFields, ", "), strings.Join(querySpots, ", "), queryItems
 }
