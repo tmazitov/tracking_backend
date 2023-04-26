@@ -27,6 +27,7 @@ func (h *UserGetHandler) Handle(ctx *gin.Context) {
 	}
 
 	h.result = bl.R_GetUser{
+		ID:        userPayload.UserId,
 		ShortName: userInfo.ShortName.String,
 		RoleID:    bl.UserRole(userInfo.RoleID.Int32),
 	}
