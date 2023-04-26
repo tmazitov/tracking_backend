@@ -51,28 +51,48 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 		return result, err
 	}
 
+	var resultOrder bl.R_OrderListItem
 	for _, order := range orders {
-		points, err := storage.OrderStorage().PointsGet(order.PointsID)
-		if err != nil {
-			return result, err
-		}
+		resultOrder = bl.R_OrderListItem{
+			ID:      order.ID,
+			Title:   order.Title,
+			StartAt: &order.StartAt,
 
-		result_item := bl.R_OrderListItem{
-			ID:                order.ID,
-			Title:             order.Title,
-			StartAt:           order.StartAt,
-			EndAt:             order.EndAt.Time,
 			StatusID:          order.StatusID,
-			Points:            points,
-			OwnerID:           order.OwnerID,
-			WorkerID:          order.WorkerID.Int64,
-			ManagerID:         order.ManagerID.Int64,
+			Points:            order.Points,
 			Helpers:           uint8(order.Helpers.Int16),
 			Comment:           order.Comment.String,
 			IsFragileCargo:    order.IsFragileCargo,
 			IsRegularCustomer: order.IsRegularCustomer,
 		}
-		result = append(result, result_item)
+
+		resultOrder.Owner = &bl.R_GetUser{
+			ID:        order.Owner.ID.Int64,
+			ShortName: order.Owner.ShortName.String,
+			RoleID:    bl.UserRole(order.Owner.RoleID.Int32),
+		}
+
+		if order.Worker.ID.Valid {
+			resultOrder.Worker = &bl.R_GetUser{
+				ID:        order.Worker.ID.Int64,
+				ShortName: order.Worker.ShortName.String,
+				RoleID:    bl.UserRole(order.Worker.RoleID.Int32),
+			}
+		}
+
+		if order.Worker.ID.Valid {
+			resultOrder.Manager = &bl.R_GetUser{
+				ID:        order.Manager.ID.Int64,
+				ShortName: order.Manager.ShortName.String,
+				RoleID:    bl.UserRole(order.Manager.RoleID.Int32),
+			}
+		}
+
+		if order.EndAt.Valid && !order.EndAt.Time.IsZero() {
+			resultOrder.EndAt = &order.EndAt.Time
+		}
+
+		result = append(result, resultOrder)
 	}
 
 	return result, err

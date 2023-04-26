@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
@@ -17,36 +18,70 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 		"",
 	}
 
-	result := []bl.DB_OrderListItem{}
+	orderListItems := []bl.DB_OrderListItem{}
 	rows, err := s.orderList(userId, userFields[roleId], filters)
 	if err != nil {
 		return nil, errors.New("DB exec error: " + err.Error())
 	}
+
+	var tempOrderId int64 = 0
 	for rows.Next() {
-		ord := bl.DB_OrderListItem{}
+		var (
+			ord     bl.DB_OrderListItem
+			point   bl.Point
+			owner   bl.DB_GetUser
+			worker  bl.DB_GetUser
+			manager bl.DB_GetUser
+		)
 		err := rows.Scan(
 			&ord.ID,
 			&ord.Title,
 			&ord.CreatedAt,
 			&ord.StartAt,
 			&ord.EndAt,
-			&ord.OwnerID,
-			&ord.WorkerID,
-			&ord.ManagerID,
 			&ord.OrderType,
 			&ord.StatusID,
-			&ord.PointsID,
 			&ord.Helpers,
 			&ord.Comment,
 			&ord.IsFragileCargo,
 			&ord.IsRegularCustomer,
+
+			&owner.ID,
+			&owner.ShortName,
+			&owner.RoleID,
+
+			&worker.ID,
+			&worker.ShortName,
+			&worker.RoleID,
+
+			&manager.ID,
+			&manager.ShortName,
+			&manager.RoleID,
+
+			&point.ID,
+			&point.Floor,
+			&point.Title,
+			&point.Latitude,
+			&point.Longitude,
 		)
 		if err != nil {
 			return nil, errors.New("DB read error: " + err.Error())
 		}
-		result = append(result, ord)
+
+		if ord.ID != tempOrderId {
+			ord.Owner = owner
+			ord.Worker = worker
+			ord.Manager = manager
+			ord.Points = []bl.Point{}
+			ord.Points = append(ord.Points, point)
+			orderListItems = append(orderListItems, ord)
+			tempOrderId = ord.ID
+		} else {
+			var listLength int = len(orderListItems) - 1
+			orderListItems[listLength].Points = append(orderListItems[listLength].Points, point)
+		}
 	}
-	return result, err
+	return orderListItems, err
 }
 
 func orderListFiltersToString(filters bl.R_OrderListFilters) (string, []interface{}) {
@@ -107,27 +142,54 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 	}
 
 	execString := `SELECT      		
-		id,
-		title,
-		created_at,
-		start_at,       
-		end_at,
-		owner_id,
-		worker_id,   
-		manager_id,
-		type_id,
-		status_id,
-		points_id,
-		helpers,
-		comment_message,
-		is_fragile_cargo,
-		is_regular_customer
-	FROM orders
-	WHERE start_at::date='%s'::date `
+		orders.id,
+		orders.title,
+		orders.created_at,
+		orders.start_at,       
+		orders.end_at,
+		orders.type_id,
+		orders.status_id,
+		orders.helpers,
+		orders.comment_message,
+		orders.is_fragile_cargo,
+		orders.is_regular_customer,
+
+		owner.id,
+		owner.short_name,
+		owner.role,
+
+		worker.id,
+		worker.short_name,
+		worker.role,
+
+		manager.id,
+		manager.short_name,
+		manager.role,
+
+		points.id, 
+		points.floor, 
+		points.title, 
+		ST_X(ST_AsText(points.point)),
+		ST_Y(ST_AsText(points.point))
+	FROM (
+		SELECT * FROM orders WHERE start_at::date=%s::date ` +
+		filterString +
+		` LIMIT %s OFFSET %s
+	) orders
+	INNER JOIN points ON points.id=ANY(orders.points_id)
+	INNER JOIN users owner ON owner.id=orders.owner_id
+	LEFT JOIN users worker ON worker.id=orders.worker_id
+	LEFT JOIN users manager ON manager.id=orders.manager_id
+	`
 
 	var rowCount uint = bl.DB_OrderListRowCount
-	execString = execString + filterString
-	execString = fmt.Sprintf(execString+"	LIMIT %d OFFSET %d", filters.Date.Format("2006-01-02"), rowCount, rowCount*filters.Page)
+	var filtersLen int = len(filterItems)
+	execString = fmt.Sprintf(execString,
+		"$"+strconv.Itoa(filtersLen+1),
+		"$"+strconv.Itoa(filtersLen+2),
+		"$"+strconv.Itoa(filtersLen+3),
+	)
+	filterItems = append(filterItems, filters.Date.Format("2006-01-02"), rowCount, rowCount*filters.Page)
 
 	fmt.Println(execString)
 

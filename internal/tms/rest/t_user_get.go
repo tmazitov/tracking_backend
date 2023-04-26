@@ -27,9 +27,8 @@ func (h *UserGetHandler) Handle(ctx *gin.Context) {
 	}
 
 	h.result = bl.R_GetUser{
-		TelNumber: userInfo.TelNumber.String,
 		ShortName: userInfo.ShortName.String,
-		RoleID:    userInfo.RoleID,
+		RoleID:    bl.UserRole(userInfo.RoleID.Int32),
 	}
 
 	core.SendResponse(200, h.result, ctx)

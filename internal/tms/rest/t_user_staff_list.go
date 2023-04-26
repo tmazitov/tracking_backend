@@ -36,10 +36,9 @@ func (h *StaffListHandler) Handle(ctx *gin.Context) {
 	h.result = []bl.R_GetUser{}
 	for _, workerInfo := range workersInfo {
 		h.result = append(h.result, bl.R_GetUser{
-			ID:        workerInfo.ID,
+			ID:        workerInfo.ID.Int64,
 			ShortName: workerInfo.ShortName.String,
-			TelNumber: workerInfo.TelNumber.String,
-			RoleID:    workerInfo.RoleID,
+			RoleID:    bl.UserRole(workerInfo.RoleID.Int32),
 		})
 	}
 

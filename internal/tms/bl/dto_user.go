@@ -13,16 +13,14 @@ const (
 
 type R_GetUser struct {
 	ID        int64    `json:"id,omitempty"`
-	TelNumber string   `json:"telNumber"`
 	ShortName string   `json:"shortName"`
 	RoleID    UserRole `json:"roleId"`
 }
 
 type DB_GetUser struct {
-	ID        int64
-	TelNumber sql.NullString
+	ID        sql.NullInt64
 	ShortName sql.NullString
-	RoleID    UserRole
+	RoleID    sql.NullInt32
 }
 
 type PutUser struct {

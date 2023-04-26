@@ -3,8 +3,6 @@ package bl
 import (
 	"database/sql"
 	"time"
-
-	"github.com/lib/pq"
 )
 
 type OrderStatus int
@@ -37,20 +35,20 @@ type R_OrderListFilters struct {
 }
 
 type R_OrderListItem struct {
-	ID                int64     `json:"orderId"`
-	Title             string    `json:"title"`
-	StartAt           time.Time `json:"startAt"`
-	EndAt             time.Time `json:"endAt,omitempty"`
-	StatusID          int       `json:"statusId"`
-	Points            []Point   `json:"points"`
-	OrderType         uint8     `json:"orderType,omitempty"`
-	OwnerID           int64     `json:"owner_id,omitempty"`
-	WorkerID          int64     `json:"worker_id,omitempty"`
-	ManagerID         int64     `json:"manager_id,omitempty"`
-	Helpers           uint8     `json:"helpers,omitempty"`
-	Comment           string    `json:"comment,omitempty"`
-	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
-	IsRegularCustomer bool      `json:"isRegularCustomer,omitempty"`
+	ID                int64      `json:"orderId"`
+	Title             string     `json:"title"`
+	StartAt           *time.Time `json:"startAt"`
+	EndAt             *time.Time `json:"endAt,omitempty"`
+	StatusID          int        `json:"statusId"`
+	Points            []Point    `json:"points"`
+	OrderType         uint8      `json:"orderType,omitempty"`
+	Owner             *R_GetUser `json:"owner,omitempty"`
+	Worker            *R_GetUser `json:"worker,omitempty"`
+	Manager           *R_GetUser `json:"manager,omitempty"`
+	Helpers           uint8      `json:"helpers,omitempty"`
+	Comment           string     `json:"comment,omitempty"`
+	IsFragileCargo    bool       `json:"isFragileCargo,omitempty"`
+	IsRegularCustomer bool       `json:"isRegularCustomer,omitempty"`
 }
 
 type DB_OrderListItem struct {
@@ -61,10 +59,10 @@ type DB_OrderListItem struct {
 	EndAt             sql.NullTime
 	StatusID          int
 	OrderType         uint8
-	PointsID          pq.Int64Array
-	OwnerID           int64
-	WorkerID          sql.NullInt64
-	ManagerID         sql.NullInt64
+	Points            []Point
+	Owner             DB_GetUser
+	Worker            DB_GetUser
+	Manager           DB_GetUser
 	Helpers           sql.NullInt16
 	Comment           sql.NullString
 	IsFragileCargo    bool

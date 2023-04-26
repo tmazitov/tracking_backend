@@ -21,7 +21,7 @@ func (s *Storage) UserGetStaffList() ([]bl.DB_GetUser, error) {
 
 	defer s.repo.Close()
 
-	execString := `SELECT id, short_name, role, telephone FROM users WHERE role=$1 OR role=$2`
+	execString := `SELECT id, short_name, role FROM users WHERE role=$1 OR role=$2`
 
 	rows, err := conn.Query(execString, bl.Manager, bl.Worker)
 	if err != nil {
@@ -29,7 +29,7 @@ func (s *Storage) UserGetStaffList() ([]bl.DB_GetUser, error) {
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&user.ID, &user.ShortName, &user.RoleID, &user.TelNumber)
+		err = rows.Scan(&user.ID, &user.ShortName, &user.RoleID)
 		if err != nil {
 			return nil, errors.New("DB exec error: " + err.Error())
 		}
