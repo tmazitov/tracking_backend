@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/lib/pq"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
@@ -92,25 +93,26 @@ func orderListFiltersToString(filters bl.R_OrderListFilters) (string, []interfac
 	)
 
 	if filters.WorkerId != 0 {
-		filterString += fmt.Sprintf("AND worker_id = $%d", filterCounter)
+		filterString += fmt.Sprintf("AND worker_id = $%d ", filterCounter)
 		filterItems = append(filterItems, filters.WorkerId)
 		filterCounter += 1
 	}
 
-	if filters.StatusID != 0 {
-		filterString += fmt.Sprintf("AND status_id = $%d", filterCounter)
-		filterItems = append(filterItems, filters.StatusID)
+	if len(filters.Statuses) != 0 {
+		fmt.Println(filters.Statuses)
+		filterString += fmt.Sprintf("AND status_id = ANY($%d) ", filterCounter)
+		filterItems = append(filterItems, pq.Array(filters.Statuses))
 		filterCounter += 1
 	}
 
-	if filters.TypeId != 0 {
-		filterString += fmt.Sprintf("AND type_id = $%d", filterCounter)
-		filterItems = append(filterItems, filters.TypeId)
+	if len(filters.Types) != 0 {
+		filterString += fmt.Sprintf("AND type_id = ANY($%d) ", filterCounter)
+		filterItems = append(filterItems, pq.Array(filters.Types))
 		filterCounter += 1
 	}
 
 	if filters.IsRegularCustomer {
-		filterString += fmt.Sprintf("AND is_regular_customer = $%d", filterCounter)
+		filterString += fmt.Sprintf("AND is_regular_customer = $%d ", filterCounter)
 		filterItems = append(filterItems, filters.IsRegularCustomer)
 		filterCounter += 1
 	}

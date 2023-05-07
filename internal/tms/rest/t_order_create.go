@@ -40,7 +40,7 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if h.input.OrderType > 6 {
+	if h.input.OrderType > 7 {
 		core.ErrorLog(400, "Bad request", errors.New("order type is greater than 6"), ctx)
 		return
 	}

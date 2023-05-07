@@ -65,9 +65,11 @@ func (s *Storage) CreateOrder(order bl.CreateOrder, role bl.UserRole) (int64, er
 		queryFieldsString      string
 		queryFieldsValues      []interface{}
 	)
-
+	fmt.Println(order.OrderType)
 	queryFieldsString, queryFieldsSpotsString, queryFieldsValues = getQueryItems(role, order, pointsID)
-
+	fmt.Println(queryFieldsString)
+	fmt.Println(queryFieldsSpotsString)
+	fmt.Println(queryFieldsValues...)
 	queryString = fmt.Sprintf(`INSERT INTO orders ( %s ) 
 	VALUES ( %s )
 	RETURNING id`, queryFieldsString, queryFieldsSpotsString)
@@ -117,6 +119,7 @@ func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (st
 		"title",
 		"helpers",
 		"comment_message",
+		"type_id",
 		"is_fragile_cargo",
 	}
 
@@ -127,19 +130,20 @@ func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (st
 		order.Title,
 		order.Helpers,
 		order.Comment,
+		order.OrderType,
 		order.IsFragileCargo,
 	}
 
-	querySpots = []string{"$1", "$2", "$3", "$4", "$5", "$6", "$7"}
+	querySpots = []string{"$1", "$2", "$3", "$4", "$5", "$6", "$7", "$8"}
 
 	if role == bl.Admin || role == bl.Manager {
-		queryFields = append(queryFields, "worker_id", "is_regular_customer", "manager_id")
-		queryItems = append(queryItems, order.WorkerID, order.IsRegularCustomer, order.OwnerID)
-		querySpots = append(querySpots, "$8", "$9", "$10")
+		queryFields = append(queryFields, "is_regular_customer", "manager_id")
+		queryItems = append(queryItems, order.IsRegularCustomer, order.OwnerID)
+		querySpots = append(querySpots, "$9", "$10")
 		if order.WorkerID != 0 {
-			queryFields = append(queryFields, "status_id")
-			queryItems = append(queryItems, 3)
-			querySpots = append(querySpots, "$11")
+			queryFields = append(queryFields, "worker_id", "status_id")
+			queryItems = append(queryItems, order.WorkerID, 4)
+			querySpots = append(querySpots, "$11", "$12")
 		}
 	}
 

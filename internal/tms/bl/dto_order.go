@@ -8,30 +8,38 @@ import (
 type OrderStatus int
 
 const (
-	OrderCanceled  OrderStatus = 1
-	OrderCreated   OrderStatus = 2
-	OrderAccepted  OrderStatus = 3
-	OrderInProcess OrderStatus = 4
-	OrderDone      OrderStatus = 5
+	OrderDone      OrderStatus = 1
+	OrderCanceled  OrderStatus = 2
+	OrderCreated   OrderStatus = 3
+	OrderAccepted  OrderStatus = 4
+	OrderInProcess OrderStatus = 5
 )
+
+func OrderStatusArrayToIntArray(statuses []OrderStatus) []int {
+	var intArray []int
+	for _, status := range statuses {
+		intArray = append(intArray, int(status))
+	}
+	return intArray
+}
 
 type OrderType int
 
 const (
 	OrderInCity        OrderType = 1
 	OrderInNearOfCity  OrderType = 2
-	OrderInBetweenCity OrderType = 3
+	OrderInBetweenCity OrderType = 4
 )
 
 const DB_OrderListRowCount uint = 15
 
 type R_OrderListFilters struct {
-	Date              time.Time   `json:"date" binding:"required" validate:"max=32"`
-	Page              uint        `json:"page_number"`
-	WorkerId          int64       `json:"worker_id"`
-	StatusID          OrderStatus `json:"statusId"`
-	TypeId            OrderType   `json:"typeId"`
-	IsRegularCustomer bool        `json:"isRegularCustomer"`
+	Date              time.Time
+	Page              uint
+	WorkerId          int64
+	Statuses          []OrderStatus
+	Types             []OrderType
+	IsRegularCustomer bool
 }
 
 type R_OrderListItem struct {
@@ -55,7 +63,7 @@ type DB_OrderListItem struct {
 	ID                int64
 	CreatedAt         time.Time
 	Title             string
-	StartAt           time.Time
+	StartAt           sql.NullTime
 	EndAt             sql.NullTime
 	StatusID          int
 	OrderType         uint8

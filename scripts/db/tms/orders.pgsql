@@ -25,7 +25,7 @@ CREATE TABLE orders (
     end_at              TIMESTAMP 	DEFAULT NULL,
 
     type_id             INT         NOT NULL DEFAULT 1,
-    status_id			INT			NOT NULL DEFAULT 2,
+    status_id			INT			NOT NULL DEFAULT 3,
     points_id           BIGINT[] 	NOT NULL,
     helpers             INT 		NOT NULL DEFAULT 0,
     comment_message     VARCHAR(256) NOT NULL DEFAULT '', 

@@ -2,12 +2,14 @@ package rest
 
 import (
 	"errors"
+	"math"
 	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
+	"github.com/tmazitov/tracking_backend.git/pkg/binary"
 	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
@@ -53,11 +55,16 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 
 	var resultOrder bl.R_OrderListItem
 	for _, order := range orders {
-		resultOrder = bl.R_OrderListItem{
-			ID:      order.ID,
-			Title:   order.Title,
-			StartAt: &order.StartAt,
 
+		var (
+			startAt time.Time = order.StartAt.Time
+			endAt   time.Time
+		)
+
+		resultOrder = bl.R_OrderListItem{
+			ID:                order.ID,
+			Title:             order.Title,
+			StartAt:           &startAt,
 			StatusID:          order.StatusID,
 			Points:            order.Points,
 			Helpers:           uint8(order.Helpers.Int16),
@@ -89,7 +96,8 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 		}
 
 		if order.EndAt.Valid && !order.EndAt.Time.IsZero() {
-			resultOrder.EndAt = &order.EndAt.Time
+			endAt = order.EndAt.Time
+			resultOrder.EndAt = &endAt
 		}
 
 		result = append(result, resultOrder)
@@ -133,8 +141,10 @@ func fillFiltersByParams(ctx *gin.Context) (bl.R_OrderListFilters, error) {
 		if err != nil {
 			return filters, errors.New("invalid status_id parameter")
 		}
-		filters.StatusID = bl.OrderStatus(value)
-
+		var statuses []int = binary.PowerOfTwo(value)
+		for _, statusItem := range statuses {
+			filters.Statuses = append(filters.Statuses, bl.OrderStatus(math.Log2(float64(statusItem))+1))
+		}
 	}
 
 	if params.Has("t") {
@@ -142,7 +152,15 @@ func fillFiltersByParams(ctx *gin.Context) (bl.R_OrderListFilters, error) {
 		if err != nil {
 			return filters, errors.New("invalid type_id parameter")
 		}
-		filters.TypeId = bl.OrderType(value)
+		if value == 1 || value == 2 || value == 4 {
+			filters.Types = append(filters.Types, bl.OrderType(value))
+		} else if value == 3 || value == 5 || value == 6 {
+			var types []int = binary.PowerOfTwo(value)
+			for _, typeItem := range types {
+				filters.Types = append(filters.Types, bl.OrderType(typeItem))
+			}
+			filters.Types = append(filters.Types, bl.OrderType(value))
+		}
 	}
 
 	if params.Has("is_reg") {
