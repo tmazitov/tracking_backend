@@ -79,6 +79,7 @@ type DB_OrderListItem struct {
 
 type R_CreatableOrder struct {
 	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
+	EndAt             time.Time `json:"endAt" validate:"max=32"`
 	Points            []Point   `json:"points"  binding:"required" validate:"dive"`
 	Title             string    `json:"title,omitempty"   validate:"max=64"`
 	WorkerID          int64     `json:"workerId,omitempty"`
@@ -93,6 +94,7 @@ type CreateOrder struct {
 	OwnerID           int64
 	WorkerID          int64
 	StartAt           time.Time
+	EndAt             time.Time
 	Title             string
 	Points            []Point
 	Helpers           uint8

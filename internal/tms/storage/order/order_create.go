@@ -145,6 +145,11 @@ func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (st
 			queryItems = append(queryItems, order.WorkerID, 4)
 			querySpots = append(querySpots, "$11", "$12")
 		}
+		if !order.EndAt.IsZero() {
+			queryFields = append(queryFields, "end_at")
+			queryItems = append(queryItems, order.EndAt)
+			querySpots = append(querySpots, fmt.Sprintf("$%d", len(querySpots)+1))
+		}
 	}
 
 	return strings.Join(queryFields, ", "), strings.Join(querySpots, ", "), queryItems

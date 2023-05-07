@@ -57,6 +57,7 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		OwnerID:           userPayload.UserId,
 		WorkerID:          h.input.WorkerID,
 		StartAt:           h.input.StartAt,
+		EndAt:             h.input.EndAt,
 		Title:             h.input.Title,
 		Points:            h.input.Points,
 		OrderType:         h.input.OrderType,
