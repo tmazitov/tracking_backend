@@ -42,7 +42,7 @@ type R_OrderListFilters struct {
 	IsRegularCustomer bool
 }
 
-type R_OrderListItem struct {
+type R_Order struct {
 	ID                int64      `json:"orderId"`
 	Title             string     `json:"title"`
 	StartAt           *time.Time `json:"startAt"`
@@ -59,7 +59,7 @@ type R_OrderListItem struct {
 	IsRegularCustomer bool       `json:"isRegularCustomer,omitempty"`
 }
 
-type DB_OrderListItem struct {
+type DB_Order struct {
 	ID                int64
 	CreatedAt         time.Time
 	Title             string
@@ -79,7 +79,7 @@ type DB_OrderListItem struct {
 
 type R_CreatableOrder struct {
 	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
-	EndAt             time.Time `json:"endAt" validate:"max=32"`
+	EndAt             time.Time `json:"endAt"   binding:"required" validate:"max=32"`
 	Points            []Point   `json:"points"  binding:"required" validate:"dive"`
 	Title             string    `json:"title,omitempty"   validate:"max=64"`
 	WorkerID          int64     `json:"workerId,omitempty"`

@@ -1,12 +1,17 @@
 package bl
 
 type OrderStorage interface {
-	OrderList(userId int64, roleId int, filters R_OrderListFilters) ([]DB_OrderListItem, error)
+	OrderList(userId int64, roleId int, filters R_OrderListFilters) ([]DB_Order, error)
+
 	OrderGetManagerID(orderId int64) (int64, error)
 	OrderGetPointsID(orderId int64) ([]int64, error)
 	OrderGetOwnerID(orderId int64) (int64, error)
 	OrderGetStatus(orderId int64) (OrderStatus, error)
+	OrderGet(orderId int64) (*DB_Order, error)
+
+	OrderUpdateWorker(orderId int64, workerId int64) (*DB_GetUser, error)
 	OrderUpdate(orderId int64, info DB_EditableOrder) error
+
 	OrderStatusUpgrade(orderId int64) (int, error)
 	CreateOrder(order CreateOrder, role UserRole) (int64, error)
 	PointsCreate(orderID int64, points []Point) ([]int64, error)

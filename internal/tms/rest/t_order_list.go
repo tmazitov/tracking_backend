@@ -18,7 +18,7 @@ type OrderListHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
 	params  bl.R_OrderListFilters
-	result  []bl.R_OrderListItem
+	result  []bl.R_Order
 }
 
 func (h *OrderListHandler) Handle(ctx *gin.Context) {
@@ -42,10 +42,10 @@ func (h *OrderListHandler) Handle(ctx *gin.Context) {
 	core.SendResponse(200, h.result, ctx)
 }
 
-func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, storage bl.Storage) ([]bl.R_OrderListItem, error) {
+func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, storage bl.Storage) ([]bl.R_Order, error) {
 	var (
-		orders []bl.DB_OrderListItem
-		result []bl.R_OrderListItem = []bl.R_OrderListItem{}
+		orders []bl.DB_Order
+		result []bl.R_Order = []bl.R_Order{}
 		err    error
 	)
 
@@ -53,7 +53,7 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 		return result, err
 	}
 
-	var resultOrder bl.R_OrderListItem
+	var resultOrder bl.R_Order
 	for _, order := range orders {
 
 		var (
@@ -61,7 +61,7 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 			endAt   time.Time
 		)
 
-		resultOrder = bl.R_OrderListItem{
+		resultOrder = bl.R_Order{
 			ID:                order.ID,
 			Title:             order.Title,
 			StartAt:           &startAt,

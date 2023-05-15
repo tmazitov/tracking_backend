@@ -10,7 +10,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilters) ([]bl.DB_OrderListItem, error) {
+func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilters) ([]bl.DB_Order, error) {
 
 	userFields := []string{
 		"owner_id",
@@ -19,7 +19,7 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 		"",
 	}
 
-	orderListItems := []bl.DB_OrderListItem{}
+	orderListItems := []bl.DB_Order{}
 	rows, err := s.orderList(userId, userFields[roleId], filters)
 	if err != nil {
 		return nil, errors.New("DB exec error: " + err.Error())
@@ -28,7 +28,7 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 	var tempOrderId int64 = 0
 	for rows.Next() {
 		var (
-			ord     bl.DB_OrderListItem
+			ord     bl.DB_Order
 			point   bl.Point
 			owner   bl.DB_GetUser
 			worker  bl.DB_GetUser
@@ -62,8 +62,8 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 			&point.ID,
 			&point.Floor,
 			&point.Title,
-			&point.Latitude,
 			&point.Longitude,
+			&point.Latitude,
 		)
 		if err != nil {
 			return nil, errors.New("DB read error: " + err.Error())
