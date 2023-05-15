@@ -1,5 +1,7 @@
 package bl
 
+import "time"
+
 type OrderStorage interface {
 	OrderList(userId int64, roleId int, filters R_OrderListFilters) ([]DB_Order, error)
 
@@ -11,6 +13,9 @@ type OrderStorage interface {
 
 	OrderUpdateWorker(orderId int64, workerId int64) (*DB_GetUser, error)
 	OrderUpdate(orderId int64, info DB_EditableOrder) error
+
+	OrderTimeStart(orderId int64) (*time.Time, error)
+	OrderTimeEnd(orderId int64) (*time.Time, error)
 
 	OrderStatusUpgrade(orderId int64) (int, error)
 	CreateOrder(order CreateOrder, role UserRole) (int64, error)

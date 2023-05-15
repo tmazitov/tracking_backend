@@ -22,7 +22,9 @@ CREATE TABLE orders (
     title               VARCHAR(256) NOT NULL,
 
     start_at            TIMESTAMP	NOT NULL,
-    end_at              TIMESTAMP 	DEFAULT NULL,
+    start_at_fact       TIMESTAMP   DEFAULT NULL
+    end_at              TIMESTAMP 	NOT NULL,
+    end_at_fact         TIMESTAMP   DEFAULT NULL
 
     type_id             INT         NOT NULL DEFAULT 1,
     status_id			INT			NOT NULL DEFAULT 3,

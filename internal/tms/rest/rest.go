@@ -30,9 +30,11 @@ func NewRouter(servicePath string, storage bl.Storage, jwtStorage *jwt.JwtStorag
 
 func (r *Router) Endpoints() []router.Endpoint {
 	return []router.Endpoint{
+		{Method: "PATCH", Path: "/order/:orderId/worker/update", Handler: &OrderSetWorkerHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "POST", Path: "/order", Handler: &OrderCreateHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/:orderId/upgrade", Handler: &OrderStatusUpgradeHandler{Storage: r.storage, Jwt: *r.jwt}},
-		{Method: "PATCH", Path: "/order/:orderId/worker/update", Handler: &OrderSetWorkerHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "GET", Path: "/order/:orderId/start", Handler: &OrderTimeStartHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "GET", Path: "/order/:orderId/end", Handler: &OrderTimeEndHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "PUT", Path: "/order/:orderId", Handler: &OrderPutHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/list", Handler: &OrderListHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/user", Handler: &UserGetHandler{Storage: r.storage, Jwt: *r.jwt}},
