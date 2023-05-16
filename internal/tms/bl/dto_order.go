@@ -46,7 +46,9 @@ type R_Order struct {
 	ID                int64      `json:"orderId"`
 	Title             string     `json:"title"`
 	StartAt           *time.Time `json:"startAt"`
-	EndAt             *time.Time `json:"endAt,omitempty"`
+	StartAtFact       *time.Time `json:"startAtFact,omitempty"`
+	EndAt             *time.Time `json:"endAt"`
+	EndAtFact         *time.Time `json:"endAtFact,omitempty"`
 	StatusID          int        `json:"statusId"`
 	Points            []Point    `json:"points"`
 	OrderType         uint8      `json:"orderType,omitempty"`
@@ -64,7 +66,9 @@ type DB_Order struct {
 	CreatedAt         time.Time
 	Title             string
 	StartAt           sql.NullTime
+	StartAtFact       sql.NullTime
 	EndAt             sql.NullTime
+	EndAtFact         sql.NullTime
 	StatusID          int
 	OrderType         uint8
 	Points            []Point

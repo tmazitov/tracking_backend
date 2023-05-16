@@ -21,10 +21,10 @@ func (s *Storage) OrderTimeEnd(orderId int64) (*time.Time, error) {
 	execString := `
 	UPDATE orders 
 	SET 
-		end_at_fact=NOW(),
+		end_at_fact=TIMEZONE('utc',NOW()),
 		status_id=1
 	WHERE id=$1
-	RETURNING NOW()`
+	RETURNING TIMEZONE('utc',NOW())`
 
 	if err = conn.QueryRow(execString, orderId).Scan(&orderEndFact); err != nil {
 		return nil, errors.New("DB exec error: " + err.Error())

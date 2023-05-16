@@ -54,17 +54,21 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 	}
 
 	var resultOrder bl.R_Order
+
 	for _, order := range orders {
 
 		var (
 			startAt time.Time = order.StartAt.Time
-			endAt   time.Time
+			endAt   time.Time = order.EndAt.Time
 		)
 
 		resultOrder = bl.R_Order{
 			ID:                order.ID,
 			Title:             order.Title,
 			StartAt:           &startAt,
+			EndAt:             &endAt,
+			StartAtFact:       nil,
+			EndAtFact:         nil,
 			StatusID:          order.StatusID,
 			Points:            order.Points,
 			Helpers:           uint8(order.Helpers.Int16),
@@ -95,9 +99,14 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 			}
 		}
 
-		if order.EndAt.Valid && !order.EndAt.Time.IsZero() {
-			endAt = order.EndAt.Time
-			resultOrder.EndAt = &endAt
+		if order.StartAtFact.Valid && !order.StartAtFact.Time.IsZero() {
+			var endAtFact time.Time = order.StartAtFact.Time
+			resultOrder.StartAtFact = &endAtFact
+		}
+
+		if order.EndAtFact.Valid && !order.EndAtFact.Time.IsZero() {
+			var startAtFact time.Time = order.EndAtFact.Time
+			resultOrder.EndAtFact = &startAtFact
 		}
 
 		result = append(result, resultOrder)
