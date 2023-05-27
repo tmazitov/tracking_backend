@@ -45,7 +45,7 @@ func (s *JwtStorage) CreateTokenPair(ctx context.Context, claims AccessClaims) (
 
 	tokens := TokenPair{}
 
-	if tokens.Access, err = s.createToken(claims, time.Minute*15); err != nil {
+	if tokens.Access, err = s.createToken(claims, time.Minute*4); err != nil {
 		return tokens, err
 	}
 	if tokens.Refresh, err = s.createToken(claims, time.Hour*24*30); err != nil {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	bl "github.com/tmazitov/tracking_backend.git/internal/tms/bl"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/ws"
 	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
@@ -14,11 +15,13 @@ import (
 type OrderTimeEndHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
+	Hub     *ws.Hub
 	query   struct {
 		OrderId int64 `json:"orderId" bind:"required"`
 	}
 	result struct {
-		EndAtFact *time.Time `json:"endAtFact"`
+		StatusID  bl.OrderStatus `json:"statusId"`
+		EndAtFact *time.Time     `json:"endAtFact"`
 	}
 }
 
@@ -50,6 +53,8 @@ func (h *OrderTimeEndHandler) Handle(ctx *gin.Context) {
 		core.ErrorLog(500, "Internal Server error", err, ctx)
 		return
 	}
+	h.result.StatusID = 1
 
+	h.Hub.UpdateEndAtFact(h.query.OrderId, h.result)
 	core.SendResponse(200, h.result, ctx)
 }

@@ -18,6 +18,11 @@ func (s *JwtStorage) ValidateAccess(ctx *gin.Context) (*AccessClaims, error) {
 		return nil, ErrUnauthorized
 	}
 
+	return s.ValidateAccessToken(ctx, token)
+}
+
+func (s *JwtStorage) ValidateAccessToken(ctx context.Context, token string) (*AccessClaims, error) {
+
 	// Check if token is exists
 	if err := s.AccessIsExists(ctx, token); err != nil {
 		return nil, err

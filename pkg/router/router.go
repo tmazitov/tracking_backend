@@ -1,25 +1,45 @@
 package router
 
 import (
+	"fmt"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
 	engine      *gin.Engine
-	servicePath string
+	serviceName string
 }
 
-func NewRouter(servicePath string) *Router {
+func NewRouter(serviceName string) *Router {
 	r := gin.Default()
-	return &Router{engine: r, servicePath: servicePath}
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+	config.AllowHeaders = []string{"Origin", "Content-Type"}
+	r.Use(cors.New(config))
+
+	return &Router{engine: r, serviceName: serviceName}
 }
 
 func (r *Router) Setup(endpoints []Endpoint) {
+
+	var prefix string
+
 	for _, endpoint := range endpoints {
-		if endpoint.Middleware != nil {
-			r.engine.Handle(endpoint.Method, r.servicePath+endpoint.Path, endpoint.Middleware.Handle(), endpoint.Handler.Handle)
+
+		if endpoint.WS {
+			prefix = fmt.Sprintf("/%s/ws", r.serviceName)
 		} else {
-			r.engine.Handle(endpoint.Method, r.servicePath+endpoint.Path, endpoint.Handler.Handle)
+			prefix = fmt.Sprintf("/%s/api", r.serviceName)
+		}
+
+		if endpoint.Middleware != nil {
+			r.engine.Handle(endpoint.Method, prefix+endpoint.Path, endpoint.Middleware.Handle(), endpoint.Handler.Handle)
+		} else {
+			r.engine.Handle(endpoint.Method, prefix+endpoint.Path, endpoint.Handler.Handle)
 		}
 	}
 }

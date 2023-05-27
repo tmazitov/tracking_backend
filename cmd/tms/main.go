@@ -31,6 +31,6 @@ func main() {
 
 	storage := storage.NewStorage(store, store, gis)
 
-	router := rest.NewRouter("/tms/api", storage, jwt)
+	router := rest.NewRouter("tms", redis, storage, jwt)
 	router.Run("5001")
 }

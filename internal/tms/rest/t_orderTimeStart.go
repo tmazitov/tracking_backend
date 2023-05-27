@@ -7,18 +7,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/ws"
 	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
 type OrderTimeStartHandler struct {
 	Storage bl.Storage
+	Hub     *ws.Hub
 	Jwt     jwt.JwtStorage
 	query   struct {
 		OrderId int64 `json:"orderId" bind:"required"`
 	}
 	result struct {
-		StartAtFact *time.Time `json:"startAtFact"`
+		StatusID    bl.OrderStatus `json:"statusId"`
+		StartAtFact *time.Time     `json:"startAtFact"`
 	}
 }
 
@@ -51,5 +54,13 @@ func (h *OrderTimeStartHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
+	h.result.StatusID = 5
+	go h.Hub.Broadcast(ws.OrderUpdateMessage{
+		OrderId: h.query.OrderId,
+		Type:    1,
+		Data:    h.result,
+	})
+
+	h.Hub.UpdateStartAtFact(h.query.OrderId, h.result)
 	core.SendResponse(200, h.result, ctx)
 }

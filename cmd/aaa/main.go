@@ -38,6 +38,6 @@ func main() {
 	// grpc.SetupServer(":5100")
 
 	// Setup router
-	router := rest.NewRouter("/aaa/api", storage, conductor, jwt)
+	router := rest.NewRouter("aaa", storage, conductor, jwt)
 	router.Run("5000")
 }

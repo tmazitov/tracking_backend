@@ -140,6 +140,7 @@ func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (st
 		queryFields = append(queryFields, "is_regular_customer", "manager_id")
 		queryItems = append(queryItems, order.IsRegularCustomer, order.OwnerID)
 		querySpots = append(querySpots, "$9", "$10")
+		fmt.Println("worker id is ", order.WorkerID)
 		if order.WorkerID != 0 {
 			queryFields = append(queryFields, "worker_id", "status_id")
 			queryItems = append(queryItems, order.WorkerID, 4)
