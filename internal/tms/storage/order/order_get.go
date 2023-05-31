@@ -9,6 +9,7 @@ import (
 func (s *Storage) OrderGet(orderID int64) (*bl.DB_Order, error) {
 	var (
 		order   bl.DB_Order
+		bill    bl.DB_OrderBill
 		point   bl.Point
 		owner   bl.DB_GetUser
 		worker  bl.DB_GetUser
@@ -31,9 +32,7 @@ func (s *Storage) OrderGet(orderID int64) (*bl.DB_Order, error) {
 		orders.end_at,
 		orders.type_id,
 		orders.status_id,
-		orders.helpers,
 		orders.comment_message,
-		orders.is_fragile_cargo,
 		orders.is_regular_customer,
 
 		owner.id,
@@ -52,12 +51,18 @@ func (s *Storage) OrderGet(orderID int64) (*bl.DB_Order, error) {
 		points.floor, 
 		points.title, 
 		ST_X(ST_AsText(points.point)),
-		ST_Y(ST_AsText(points.point))
+		ST_Y(ST_AsText(points.point)),
+
+		bill.car_type_id,
+		bill.helper_count,
+		bill.helper_hours,
+		bill.is_fragile_cargo
 	FROM (
 		SELECT * FROM orders WHERE id=$1
 	) orders
 	INNER JOIN points ON points.id=ANY(orders.points_id)
 	INNER JOIN users owner ON owner.id=orders.owner_id
+	INNER JOIN order_bills bill ON bill.order_id=orders.id
 	LEFT JOIN users worker ON worker.id=orders.worker_id
 	LEFT JOIN users manager ON manager.id=orders.manager_id
 	`
@@ -78,9 +83,7 @@ func (s *Storage) OrderGet(orderID int64) (*bl.DB_Order, error) {
 			&order.EndAt,
 			&order.OrderType,
 			&order.StatusID,
-			&order.Helpers,
 			&order.Comment,
-			&order.IsFragileCargo,
 			&order.IsRegularCustomer,
 
 			&owner.ID,
@@ -100,6 +103,11 @@ func (s *Storage) OrderGet(orderID int64) (*bl.DB_Order, error) {
 			&point.Title,
 			&point.Longitude,
 			&point.Latitude,
+
+			&bill.CarTypeID,
+			&bill.HelperCount,
+			&bill.HelperHours,
+			&bill.IsFragileCargo,
 		)
 		if err != nil {
 			return nil, errors.New("DB read error: " + err.Error())

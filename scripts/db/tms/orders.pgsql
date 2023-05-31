@@ -22,16 +22,15 @@ CREATE TABLE orders (
     title               VARCHAR(256) NOT NULL,
 
     start_at            TIMESTAMP	NOT NULL,
-    start_at_fact       TIMESTAMP   DEFAULT NULL
+    start_at_fact       TIMESTAMP   DEFAULT NULL,
     end_at              TIMESTAMP 	NOT NULL,
-    end_at_fact         TIMESTAMP   DEFAULT NULL
+    end_at_fact         TIMESTAMP   DEFAULT NULL,
 
     type_id             INT         NOT NULL DEFAULT 1,
     status_id			INT			NOT NULL DEFAULT 3,
     points_id           BIGINT[] 	NOT NULL,
     helpers             INT 		NOT NULL DEFAULT 0,
     comment_message     VARCHAR(256) NOT NULL DEFAULT '', 
-    is_fragile_cargo    BOOLEAN 	NOT NULL DEFAULT FALSE,
     is_regular_customer BOOLEAN     NOT NULL DEFAULT FALSE,
 
     canceled_a          TIMESTAMP            DEFAULT NULL,

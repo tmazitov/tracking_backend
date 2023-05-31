@@ -19,21 +19,17 @@ func (s *Storage) OrderUpdateWorker(orderId int64, workerId int64) (*bl.DB_GetUs
 	defer s.repo.Close()
 
 	execString := `
-	UPDATE orders 
+	UPDATE orders
 	SET 
-		worker_id=$2,
-		status_id=4
+		worker_id = $2,
+		status_id = $3
 	FROM (
-		SELECT
-			*
-		FROM orders
-		WHERE id=$1
-		FOR UPDATE
-	) o
-		INNER JOIN users w ON w.id=$2
-	RETURNING w.id, w.short_name, w.role`
+		SELECT * FROM users WHERE id = $2
+	) worker
+	WHERE orders.id = $1
+	RETURNING worker.id, worker.short_name, worker.role`
 
-	if err = conn.QueryRow(execString, orderId, workerId).Scan(&worker.ID, &worker.ShortName, &worker.RoleID); err != nil {
+	if err = conn.QueryRow(execString, orderId, workerId, bl.OrderAccepted).Scan(&worker.ID, &worker.ShortName, &worker.RoleID); err != nil {
 		return nil, errors.New("DB exec error: " + err.Error())
 	}
 

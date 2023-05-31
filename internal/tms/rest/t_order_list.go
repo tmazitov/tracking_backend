@@ -2,6 +2,7 @@ package rest
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"net/url"
 	"strconv"
@@ -71,32 +72,46 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 			EndAtFact:         nil,
 			StatusID:          order.StatusID,
 			Points:            order.Points,
-			Helpers:           uint8(order.Helpers.Int16),
 			Comment:           order.Comment.String,
-			IsFragileCargo:    order.IsFragileCargo,
 			IsRegularCustomer: order.IsRegularCustomer,
+			Price: &bl.R_OrderBill{
+				CarTypeID:      order.Bill.CarTypeID,
+				CarPrice:       order.Bill.CarPrice,
+				CarHours:       order.Bill.CarHours,
+				HelperCount:    uint(order.Bill.HelperCount.Int16),
+				HelperHours:    uint(order.Bill.HelperHours.Int16),
+				HelperPrice:    uint(order.Bill.HelperPrice.Int16),
+				KM:             uint(order.Bill.KM.Int16),
+				IsFragileCargo: order.Bill.IsFragileCargo,
+				Total:          order.Bill.Total,
+				TotalInFact:    uint(order.Bill.TotalInFact.Int32),
+			},
 		}
 
-		resultOrder.Owner = &bl.R_GetUser{
+		owner := bl.R_GetUser{
 			ID:        order.Owner.ID.Int64,
 			ShortName: order.Owner.ShortName.String,
 			RoleID:    bl.UserRole(order.Owner.RoleID.Int32),
 		}
+		resultOrder.Owner = &owner
 
 		if order.Worker.ID.Valid {
-			resultOrder.Worker = &bl.R_GetUser{
+			var worker bl.R_GetUser = bl.R_GetUser{
 				ID:        order.Worker.ID.Int64,
 				ShortName: order.Worker.ShortName.String,
 				RoleID:    bl.UserRole(order.Worker.RoleID.Int32),
 			}
+			resultOrder.Worker = &worker
+			fmt.Println(order.Worker.ShortName.String)
 		}
 
-		if order.Worker.ID.Valid {
-			resultOrder.Manager = &bl.R_GetUser{
+		if order.Manager.ID.Valid {
+			var manager bl.R_GetUser = bl.R_GetUser{
 				ID:        order.Manager.ID.Int64,
 				ShortName: order.Manager.ShortName.String,
 				RoleID:    bl.UserRole(order.Manager.RoleID.Int32),
 			}
+			resultOrder.Manager = &manager
 		}
 
 		if order.StartAtFact.Valid && !order.StartAtFact.Time.IsZero() {

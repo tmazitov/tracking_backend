@@ -29,6 +29,7 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 	for rows.Next() {
 		var (
 			ord     bl.DB_Order
+			bill    bl.DB_OrderBill
 			point   bl.Point
 			owner   bl.DB_GetUser
 			worker  bl.DB_GetUser
@@ -44,9 +45,7 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 			&ord.EndAtFact,
 			&ord.OrderType,
 			&ord.StatusID,
-			&ord.Helpers,
 			&ord.Comment,
-			&ord.IsFragileCargo,
 			&ord.IsRegularCustomer,
 
 			&owner.ID,
@@ -66,12 +65,18 @@ func (s *Storage) OrderList(userId int64, roleId int, filters bl.R_OrderListFilt
 			&point.Title,
 			&point.Longitude,
 			&point.Latitude,
+
+			&bill.CarTypeID,
+			&bill.HelperCount,
+			&bill.HelperHours,
+			&bill.IsFragileCargo,
 		)
 		if err != nil {
 			return nil, errors.New("DB read error: " + err.Error())
 		}
 
 		if ord.ID != tempOrderId {
+			ord.Bill = bill
 			ord.Owner = owner
 			ord.Worker = worker
 			ord.Manager = manager
@@ -155,9 +160,7 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 		orders.end_at_fact,
 		orders.type_id,
 		orders.status_id,
-		orders.helpers,
 		orders.comment_message,
-		orders.is_fragile_cargo,
 		orders.is_regular_customer,
 
 		owner.id,
@@ -176,7 +179,12 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 		points.floor, 
 		points.title, 
 		ST_X(ST_AsText(points.point)),
-		ST_Y(ST_AsText(points.point))
+		ST_Y(ST_AsText(points.point)),
+
+		bill.car_type_id,
+		bill.helper_count,
+		bill.helper_hours,
+		bill.is_fragile_cargo
 	FROM (
 		SELECT * FROM orders WHERE start_at::date=%s::date ` +
 		filterString +
@@ -184,6 +192,7 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 	) orders
 	INNER JOIN points ON points.id=ANY(orders.points_id)
 	INNER JOIN users owner ON owner.id=orders.owner_id
+	INNER JOIN order_bills bill ON bill.order_id=orders.id
 	LEFT JOIN users worker ON worker.id=orders.worker_id
 	LEFT JOIN users manager ON manager.id=orders.manager_id
 	`

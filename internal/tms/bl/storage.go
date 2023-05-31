@@ -17,12 +17,16 @@ type OrderStorage interface {
 	OrderTimeStart(orderId int64) (*time.Time, error)
 	OrderTimeEnd(orderId int64) (*time.Time, error)
 
+	OrderBillUpdatePrice(orderId int64, bill R_OrderBill) error
+
 	OrderStatusUpgrade(orderId int64) (int, error)
 	CreateOrder(order CreateOrder, role UserRole) (int64, error)
 	PointsCreate(orderID int64, points []Point) ([]int64, error)
 	PointsUpdate(points []Point) ([]int64, error)
 	PointsDelete(pointsID []int64) error
 	PointsGet(pointsID []int64) ([]Point, error)
+
+	OrderDefaultPrices() ([]DefaultPriceItems, error)
 }
 
 type UserStorage interface {

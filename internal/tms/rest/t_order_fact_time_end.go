@@ -49,6 +49,17 @@ func (h *OrderTimeEndHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
+	order, err := h.Storage.OrderStorage().OrderGet(h.query.OrderId)
+	if err != nil {
+		core.ErrorLog(500, "Internal server error", err, ctx)
+		return
+	}
+
+	if order.Worker.ID.Int64 != userPayload.UserId {
+		core.ErrorLog(403, "Forbidden", errors.New("start order : user is not worker"), ctx)
+		return
+	}
+
 	if h.result.EndAtFact, err = h.Storage.OrderStorage().OrderTimeEnd(h.query.OrderId); err != nil {
 		core.ErrorLog(500, "Internal Server error", err, ctx)
 		return

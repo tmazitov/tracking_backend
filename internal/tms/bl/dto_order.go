@@ -43,22 +43,23 @@ type R_OrderListFilters struct {
 }
 
 type R_Order struct {
-	ID                int64      `json:"orderId"`
-	Title             string     `json:"title"`
-	StartAt           *time.Time `json:"startAt"`
-	StartAtFact       *time.Time `json:"startAtFact,omitempty"`
-	EndAt             *time.Time `json:"endAt"`
-	EndAtFact         *time.Time `json:"endAtFact,omitempty"`
-	StatusID          int        `json:"statusId"`
-	Points            []Point    `json:"points"`
-	OrderType         uint8      `json:"orderType,omitempty"`
-	Owner             *R_GetUser `json:"owner,omitempty"`
-	Worker            *R_GetUser `json:"worker,omitempty"`
-	Manager           *R_GetUser `json:"manager,omitempty"`
-	Helpers           uint8      `json:"helpers,omitempty"`
-	Comment           string     `json:"comment,omitempty"`
-	IsFragileCargo    bool       `json:"isFragileCargo,omitempty"`
-	IsRegularCustomer bool       `json:"isRegularCustomer,omitempty"`
+	ID                int64        `json:"orderId"`
+	Title             string       `json:"title"`
+	StartAt           *time.Time   `json:"startAt"`
+	StartAtFact       *time.Time   `json:"startAtFact,omitempty"`
+	EndAt             *time.Time   `json:"endAt"`
+	EndAtFact         *time.Time   `json:"endAtFact,omitempty"`
+	StatusID          int          `json:"statusId"`
+	Points            []Point      `json:"points"`
+	OrderType         uint8        `json:"orderType,omitempty"`
+	Owner             *R_GetUser   `json:"owner,omitempty"`
+	Worker            *R_GetUser   `json:"worker,omitempty"`
+	Manager           *R_GetUser   `json:"manager,omitempty"`
+	Helpers           uint8        `json:"helpers,omitempty"`
+	Comment           string       `json:"comment,omitempty"`
+	IsFragileCargo    bool         `json:"isFragileCargo,omitempty"`
+	IsRegularCustomer bool         `json:"isRegularCustomer,omitempty"`
+	Price             *R_OrderBill `json:"price"`
 }
 
 type DB_Order struct {
@@ -75,23 +76,47 @@ type DB_Order struct {
 	Owner             DB_GetUser
 	Worker            DB_GetUser
 	Manager           DB_GetUser
-	Helpers           sql.NullInt16
 	Comment           sql.NullString
-	IsFragileCargo    bool
+	Bill              DB_OrderBill
 	IsRegularCustomer bool
 }
 
+type R_OrderBill struct {
+	CarTypeID      uint8 `json:"carTypeId"`
+	HelperCount    uint  `json:"helperCount,omitempty"`
+	HelperPrice    uint  `json:"helperPrice,omitempty"`
+	HelperHours    uint  `json:"helperHours,omitempty"`
+	CarPrice       uint  `json:"carPrice"`
+	CarHours       uint  `json:"carHours"`
+	KM             uint  `json:"km,omitempty"`
+	IsFragileCargo bool  `json:"isFragileCargo,omitempty"`
+	Total          uint  `json:"total"`
+	TotalInFact    uint  `json:"totalInFact,omitempty"`
+}
+
+type DB_OrderBill struct {
+	CarTypeID      uint8
+	HelperCount    sql.NullInt16
+	HelperPrice    sql.NullInt16
+	HelperHours    sql.NullInt16
+	CarPrice       uint
+	CarHours       uint
+	KM             sql.NullInt16
+	IsFragileCargo bool
+	Total          uint
+	TotalInFact    sql.NullInt32
+}
+
 type R_CreatableOrder struct {
-	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
-	EndAt             time.Time `json:"endAt"   binding:"required" validate:"max=32"`
-	Points            []Point   `json:"points"  binding:"required" validate:"dive"`
-	Title             string    `json:"title,omitempty"   validate:"max=64"`
-	WorkerID          int64     `json:"workerId,omitempty"`
-	Helpers           uint8     `json:"helpers,omitempty"`
-	OrderType         uint8     `json:"orderType,omitempty"`
-	Comment           string    `json:"comment,omitempty" validate:"max=256"`
-	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
-	IsRegularCustomer bool      `json:"isRegularCustomer,omitempty"`
+	StartAt           time.Time   `json:"startAt" binding:"required" validate:"max=32"`
+	EndAt             time.Time   `json:"endAt"   binding:"required" validate:"max=32"`
+	Points            []Point     `json:"points"  binding:"required" validate:"dive"`
+	Title             string      `json:"title,omitempty"   validate:"max=64"`
+	WorkerID          int64       `json:"workerId,omitempty"`
+	OrderType         uint8       `json:"orderType,omitempty"`
+	Comment           string      `json:"comment,omitempty" validate:"max=256"`
+	IsRegularCustomer bool        `json:"isRegularCustomer,omitempty"`
+	Price             R_OrderBill `json:"price"`
 }
 
 type CreateOrder struct {
@@ -147,4 +172,9 @@ func (p *Point) ToEditData() []interface{} {
 	var data []interface{}
 	data = append(data, p.ID, p.Title, p.StepID, p.Floor, p.Latitude, p.Longitude)
 	return data
+}
+
+type DefaultPriceItems struct {
+	Name  string `json:"name"`
+	Value uint   `json:"val"`
 }

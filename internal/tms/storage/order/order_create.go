@@ -117,10 +117,8 @@ func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (st
 		"owner_id",
 		"points_id",
 		"title",
-		"helpers",
 		"comment_message",
 		"type_id",
-		"is_fragile_cargo",
 	}
 
 	queryItems = []interface{}{
@@ -128,23 +126,21 @@ func getQueryItems(role bl.UserRole, order bl.CreateOrder, pointsID []int64) (st
 		order.OwnerID,
 		pq.Int64Array(pointsID),
 		order.Title,
-		order.Helpers,
 		order.Comment,
 		order.OrderType,
-		order.IsFragileCargo,
 	}
 
-	querySpots = []string{"$1", "$2", "$3", "$4", "$5", "$6", "$7", "$8"}
+	querySpots = []string{"$1", "$2", "$3", "$4", "$5", "$6"}
 
 	if role == bl.Admin || role == bl.Manager {
 		queryFields = append(queryFields, "is_regular_customer", "manager_id")
 		queryItems = append(queryItems, order.IsRegularCustomer, order.OwnerID)
-		querySpots = append(querySpots, "$9", "$10")
+		querySpots = append(querySpots, "$7", "$8")
 		fmt.Println("worker id is ", order.WorkerID)
 		if order.WorkerID != 0 {
 			queryFields = append(queryFields, "worker_id", "status_id")
 			queryItems = append(queryItems, order.WorkerID, 4)
-			querySpots = append(querySpots, "$11", "$12")
+			querySpots = append(querySpots, "$9", "$10")
 		}
 		if !order.EndAt.IsZero() {
 			queryFields = append(queryFields, "end_at")
