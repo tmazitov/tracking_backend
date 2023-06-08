@@ -17,6 +17,7 @@ type Client struct {
 	role            bl.UserRole
 	isRefreshNeeded bool
 	isAuthorized    bool
+	filters         bl.R_OrderListFilters
 	conn            *websocket.Conn
 	send            chan []byte
 	access          string
@@ -35,9 +36,15 @@ func NewClient(conn *websocket.Conn, redis *redis.Client) *Client {
 func (c *Client) readPump(hub *Hub, jwt *jwt.JwtStorage) {
 
 	var (
-		message      AuthMessage
-		ctx          context.Context = context.Background()
-		jsonResponse []byte
+		message ClientMessage
+		ctx     context.Context = context.Background()
+	)
+
+	var (
+		success             *Response = NewResponse(200, "Success")
+		badRequestError     *Response = NewResponse(400, "Bad request")
+		unauthorizedError   *Response = NewResponse(401, "Unauthorized")
+		internalServerError *Response = NewResponse(500, "Internal Server error")
 	)
 
 	defer c.conn.Close()
@@ -56,24 +63,35 @@ func (c *Client) readPump(hub *Hub, jwt *jwt.JwtStorage) {
 		// Authorization check
 		_, err = c.authMiddleware(jwt, message.Access)
 		if err != nil {
-			jsonResponse, err := NewResponse(401, "Unauthorized").Marshal()
-			if err != nil {
-				log.Println("wrong report marshal")
-				continue
+			if err = c.sendResponse(unauthorizedError); err != nil {
+				log.Println("wrong report marshal: ", err)
 			}
-			c.send <- jsonResponse
 			continue
 		}
 
-		c.isRefreshNeeded = true
-		jsonResponse, err = NewResponse(200, "Success").Marshal()
+		// Routing
+		err = c.route(&message)
+		if err == errBadRequest {
+			if err = c.sendResponse(badRequestError); err != nil {
+				log.Println("wrong report marshal: ", err)
+			}
+			continue
+		}
 		if err != nil {
-			log.Println("wrong report marshal")
+			if err = c.sendResponse(internalServerError); err != nil {
+				log.Println("wrong report marshal: ", err)
+			}
 			continue
 		}
 
-		c.send <- jsonResponse
+		// Send response success
+		c.isRefreshNeeded = true
+		if err = c.sendResponse(success); err != nil {
+			log.Println("wrong report marshal: ", err)
+			continue
+		}
 
+		// Send all messages from wait list
 		waitListMessages, err := c.waitList.GetAll(ctx, c)
 		if err != nil {
 			log.Println("wrong get messages from wait list", err)
@@ -83,6 +101,23 @@ func (c *Client) readPump(hub *Hub, jwt *jwt.JwtStorage) {
 			c.send <- message
 		}
 	}
+}
+
+func (c *Client) sendResponse(response *Response) error {
+
+	var (
+		json []byte
+		err  error
+	)
+
+	json, err = response.Marshal()
+	if err != nil {
+		return err
+	}
+
+	c.send <- json
+
+	return nil
 }
 
 func (c *Client) writePump(jwt *jwt.JwtStorage) {
@@ -98,7 +133,7 @@ func (c *Client) writePump(jwt *jwt.JwtStorage) {
 			return
 		}
 
-		fmt.Printf("user id: %d -- authorized: %t	message:%s \n", c.userId, c.isAuthorized, string(message))
+		fmt.Printf("user id: %d -- authorized: %t	message:%s \n\tfilters: %s \n", c.userId, c.isAuthorized, string(message), c.filters.Date.String())
 
 		err := c.conn.WriteMessage(websocket.TextMessage, message)
 		if err != nil {

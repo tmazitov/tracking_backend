@@ -34,12 +34,12 @@ const (
 const DB_OrderListRowCount uint = 15
 
 type R_OrderListFilters struct {
-	Date              time.Time
-	Page              uint
-	WorkerId          int64
-	Statuses          []OrderStatus
-	Types             []OrderType
-	IsRegularCustomer bool
+	Date              time.Time     `json:"date"`
+	Page              uint          `json:"page,omitempty"`
+	WorkerId          int64         `json:"workerId,omitempty"`
+	Statuses          []OrderStatus `json:"statuses,omitempty"`
+	Types             []OrderType   `json:"types,omitempty"`
+	IsRegularCustomer bool          `json:"isRegularCustomer,omitempty"`
 }
 
 type R_Order struct {
@@ -79,6 +79,68 @@ type DB_Order struct {
 	Comment           sql.NullString
 	Bill              DB_OrderBill
 	IsRegularCustomer bool
+}
+
+func (o *DB_Order) ToReal() *R_Order {
+	var (
+		startAt time.Time = o.StartAt.Time
+		endAt   time.Time = o.EndAt.Time
+	)
+	var order R_Order = R_Order{
+		ID:                o.ID,
+		Title:             o.Title,
+		StartAt:           &startAt,
+		EndAt:             &endAt,
+		StartAtFact:       nil,
+		EndAtFact:         nil,
+		StatusID:          o.StatusID,
+		Points:            o.Points,
+		Comment:           o.Comment.String,
+		IsRegularCustomer: o.IsRegularCustomer,
+		Price: &R_OrderBill{
+			CarTypeID:      o.Bill.CarTypeID,
+			HelperCount:    uint(o.Bill.HelperCount.Int16),
+			HelperHours:    uint(o.Bill.HelperHours.Int16),
+			IsFragileCargo: o.Bill.IsFragileCargo,
+		},
+	}
+
+	owner := R_GetUser{
+		ID:        o.Owner.ID.Int64,
+		ShortName: o.Owner.ShortName.String,
+		RoleID:    UserRole(o.Owner.RoleID.Int32),
+	}
+	order.Owner = &owner
+
+	if o.Worker.ID.Valid {
+		var worker R_GetUser = R_GetUser{
+			ID:        o.Worker.ID.Int64,
+			ShortName: o.Worker.ShortName.String,
+			RoleID:    UserRole(o.Worker.RoleID.Int32),
+		}
+		order.Worker = &worker
+	}
+
+	if o.Manager.ID.Valid {
+		var manager R_GetUser = R_GetUser{
+			ID:        o.Manager.ID.Int64,
+			ShortName: o.Manager.ShortName.String,
+			RoleID:    UserRole(o.Manager.RoleID.Int32),
+		}
+		order.Manager = &manager
+	}
+
+	if o.StartAtFact.Valid && !o.StartAtFact.Time.IsZero() {
+		var endAtFact time.Time = o.StartAtFact.Time
+		order.StartAtFact = &endAtFact
+	}
+
+	if o.EndAtFact.Valid && !o.EndAtFact.Time.IsZero() {
+		var startAtFact time.Time = o.EndAtFact.Time
+		order.EndAtFact = &startAtFact
+	}
+
+	return &order
 }
 
 type R_OrderBill struct {

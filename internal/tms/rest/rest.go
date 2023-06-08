@@ -19,7 +19,7 @@ type Router struct {
 func NewRouter(servicePath string, redis *redis.Client, storage bl.Storage, jwtStorage *jwt.JwtStorage) Router {
 	core := router.NewRouter(servicePath)
 
-	hub := ws.NewHub(redis, jwtStorage)
+	hub := ws.NewHub(storage, redis, jwtStorage)
 
 	r := Router{
 		hub:         hub,

@@ -37,11 +37,6 @@ func (h *Hub) UpdateWorker(ctx context.Context, order *bl.R_Order, result interf
 
 	var err error
 
-	// Send updates for all managers
-	if err = h.sendByUserRole(ctx, &message, bl.Manager); err != nil {
-		return err
-	}
-
 	// Send updates for all admins
 	if err = h.sendByUserRole(ctx, &message, bl.Admin); err != nil {
 		return err

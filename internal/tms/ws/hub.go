@@ -13,6 +13,7 @@ import (
 )
 
 type Hub struct {
+	storage      bl.Storage
 	messagesChan chan OrderUpdateMessage
 	clients      map[*Client]bool
 	clientsLock  sync.Mutex
@@ -21,12 +22,13 @@ type Hub struct {
 	jwt          *jwt.JwtStorage
 }
 
-func NewHub(redis *redis.Client, jwt *jwt.JwtStorage) *Hub {
+func NewHub(storage bl.Storage, redis *redis.Client, jwt *jwt.JwtStorage) *Hub {
 	return &Hub{
 		messagesChan: make(chan OrderUpdateMessage),
 		clients:      make(map[*Client]bool),
 		broadcast:    make(chan []byte),
 		clientsLock:  sync.Mutex{},
+		storage:      storage,
 		redis:        redis,
 		jwt:          jwt,
 	}
@@ -96,6 +98,19 @@ func (h *Hub) sendByUserRole(ctx context.Context, message *OrderUpdateMessage, r
 	if err != nil {
 		return err
 	}
+
+	var (
+		orderRaw *bl.DB_Order
+		order    *bl.R_Order
+	)
+
+	if orderRaw, err = h.storage.OrderStorage().OrderGet(message.OrderId); err != nil {
+		fmt.Println("invalid user id")
+		return err
+	}
+
+	order = orderRaw.ToReal()
+
 	for client := range h.clients {
 		if client.role != role {
 			continue
@@ -108,6 +123,11 @@ func (h *Hub) sendByUserRole(ctx context.Context, message *OrderUpdateMessage, r
 			}
 			continue
 		}
+
+		if ok := client.CheckFilters(order); !ok {
+			continue
+		}
+
 		client.send <- j
 	}
 
@@ -129,6 +149,18 @@ func (h *Hub) sendByUserId(ctx context.Context, message *OrderUpdateMessage, use
 		}
 	}
 
+	var (
+		orderRaw *bl.DB_Order
+		order    *bl.R_Order
+	)
+
+	if orderRaw, err = h.storage.OrderStorage().OrderGet(message.OrderId); err != nil {
+		fmt.Println("invalid user id")
+		return err
+	}
+
+	order = orderRaw.ToReal()
+
 	for _, client := range userClients {
 		if _, err := client.checkAccess(h.jwt); err != nil {
 			if err := client.waitList.Add(ctx, client, j); err != nil {
@@ -136,6 +168,11 @@ func (h *Hub) sendByUserId(ctx context.Context, message *OrderUpdateMessage, use
 			}
 			continue
 		}
+
+		if ok := client.CheckFilters(order); !ok {
+			continue
+		}
+
 		client.send <- j
 	}
 

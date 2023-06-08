@@ -16,10 +16,6 @@ type OrderUpdateMessage struct {
 	Data    interface{} `json:"data"`
 }
 
-type AuthMessage struct {
-	Access string `json:"access"`
-}
-
 type Response struct {
 	Status int16  `json:"status"`
 	Msg    string `json:"msg"`
