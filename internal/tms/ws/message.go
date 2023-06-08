@@ -4,9 +4,10 @@ import "encoding/json"
 
 type MessageType uint8
 
-var (
+const (
 	OrderUpdateStartAtFact MessageType = 1
 	OrderUpdateEndAtFact   MessageType = 2
+	OrderUpdateWorker      MessageType = 3
 )
 
 type OrderUpdateMessage struct {

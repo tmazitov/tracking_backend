@@ -38,7 +38,7 @@ func NewRouter(servicePath string, redis *redis.Client, storage bl.Storage, jwtS
 
 func (r *Router) Endpoints() []router.Endpoint {
 	return []router.Endpoint{
-		{Method: "PATCH", Path: "/order/:orderId/worker/update", Handler: &OrderSetWorkerHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "PATCH", Path: "/order/:orderId/worker/update", Handler: &OrderSetWorkerHandler{Storage: r.storage, Jwt: *r.jwt, Hub: r.hub}},
 		{Method: "POST", Path: "/order", Handler: &OrderCreateHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/:orderId/upgrade", Handler: &OrderStatusUpgradeHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/:orderId/start", Handler: &OrderTimeStartHandler{Storage: r.storage, Jwt: *r.jwt, Hub: r.hub}},

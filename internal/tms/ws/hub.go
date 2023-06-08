@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 )
 
@@ -28,22 +29,6 @@ func NewHub(redis *redis.Client, jwt *jwt.JwtStorage) *Hub {
 		clientsLock:  sync.Mutex{},
 		redis:        redis,
 		jwt:          jwt,
-	}
-}
-
-func (h *Hub) UpdateStartAtFact(orderId int64, data interface{}) {
-	h.messagesChan <- OrderUpdateMessage{
-		OrderId: orderId,
-		Type:    OrderUpdateStartAtFact,
-		Data:    data,
-	}
-}
-
-func (h *Hub) UpdateEndAtFact(orderId int64, data interface{}) {
-	h.messagesChan <- OrderUpdateMessage{
-		OrderId: orderId,
-		Type:    OrderUpdateEndAtFact,
-		Data:    data,
 	}
 }
 
@@ -74,25 +59,8 @@ func (h *Hub) Run() {
 			for client := range h.clients {
 
 				if _, err := client.checkAccess(h.jwt); err != nil {
-
-					client.isAuthorized = false
-
-					fmt.Println("add message to wait list")
-					if err = client.waitList.Add(ctx, client, messageData); err != nil {
+					if err := client.waitList.Add(ctx, client, messageData); err != nil {
 						log.Println("wrong save message to the wait list", err)
-						continue
-					}
-
-					if client.isRefreshNeeded {
-						fmt.Println("make report to client")
-						jsonReport, err := NewResponse(401, "Unauthorized").Marshal()
-						if err != nil {
-							log.Println("wrong report marshal")
-							continue
-						}
-
-						client.send <- jsonReport
-						fmt.Println("send report to client")
 					}
 					continue
 				}
@@ -120,4 +88,56 @@ func (h *Hub) RunOrderDispatcher() {
 			h.broadcast <- j
 		}
 	}
+}
+
+func (h *Hub) sendByUserRole(ctx context.Context, message *OrderUpdateMessage, role bl.UserRole) error {
+
+	j, err := json.Marshal(&message)
+	if err != nil {
+		return err
+	}
+	for client := range h.clients {
+		if client.role != role {
+			continue
+		}
+
+		if _, err := client.checkAccess(h.jwt); err != nil {
+			if err := client.waitList.Add(ctx, client, j); err != nil {
+				log.Println("wrong save message to the wait list", err)
+				return err
+			}
+			continue
+		}
+		client.send <- j
+	}
+
+	return nil
+}
+
+func (h *Hub) sendByUserId(ctx context.Context, message *OrderUpdateMessage, userId int64) error {
+
+	j, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+
+	var userClients []*Client
+
+	for client := range h.clients {
+		if client.userId == userId {
+			userClients = append(userClients, client)
+		}
+	}
+
+	for _, client := range userClients {
+		if _, err := client.checkAccess(h.jwt); err != nil {
+			if err := client.waitList.Add(ctx, client, j); err != nil {
+				log.Println("wrong save message to the wait list", err)
+			}
+			continue
+		}
+		client.send <- j
+	}
+
+	return nil
 }

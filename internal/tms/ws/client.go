@@ -8,11 +8,13 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
+	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 	"github.com/tmazitov/tracking_backend.git/pkg/jwt"
 )
 
 type Client struct {
 	userId          int64
+	role            bl.UserRole
 	isRefreshNeeded bool
 	isAuthorized    bool
 	conn            *websocket.Conn
