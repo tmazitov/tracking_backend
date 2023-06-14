@@ -1,6 +1,9 @@
 package bl
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 type UserRole int
 
@@ -26,4 +29,10 @@ type DB_GetUser struct {
 type PutUser struct {
 	TelNumber string `json:"telNumber"`
 	ShortName string `json:"shotName"`
+}
+
+type UserHoliday struct {
+	WorkerId int64
+	AuthorId int64
+	Date     *time.Time
 }

@@ -33,7 +33,7 @@ CREATE TABLE orders (
     comment_message     VARCHAR(256) NOT NULL DEFAULT '', 
     is_regular_customer BOOLEAN     NOT NULL DEFAULT FALSE,
 
-    canceled_a          TIMESTAMP            DEFAULT NULL,
+    canceled_at         TIMESTAMP            DEFAULT NULL,
     created_at			TIMESTAMP   NOT NULL DEFAULT NOW(),
     edited_at 			TIMESTAMP	NOT NULL DEFAULT NOW(),
 

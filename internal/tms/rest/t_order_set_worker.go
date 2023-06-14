@@ -42,6 +42,11 @@ func (h *OrderSetWorkerHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
+	if userPayload.RoleId != int(bl.Admin) {
+		core.ErrorLog(403, "Forbidden", errors.New("users can not set worker for the order"), ctx)
+		return
+	}
+
 	h.query.OrderId, err = strconv.ParseInt(ctx.Param("orderId"), 10, 64)
 	if err != nil || h.query.OrderId <= 0 {
 		core.ErrorLog(400, "Bad request", errors.New("set order worker : order_id is invalid"), ctx)
@@ -53,11 +58,6 @@ func (h *OrderSetWorkerHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if userPayload.RoleId != int(bl.Manager) && userPayload.RoleId != int(bl.Admin) {
-		core.ErrorLog(403, "Forbidden", errors.New("users can not set worker for the order"), ctx)
-		return
-	}
-
 	if order, err = h.Storage.OrderStorage().OrderGet(h.query.OrderId); err != nil {
 		core.ErrorLog(400, "Bad request", err, ctx)
 		return
@@ -65,11 +65,6 @@ func (h *OrderSetWorkerHandler) Handle(ctx *gin.Context) {
 
 	if order.StatusID == int(bl.OrderCanceled) || order.StatusID == int(bl.OrderDone) {
 		core.ErrorLog(403, "Forbidden", errors.New("status id is invalid for worker update of order"), ctx)
-		return
-	}
-
-	if !order.Manager.ID.Valid || order.Manager.ID.Int64 != userPayload.UserId {
-		core.ErrorLog(403, "Forbidden", errors.New("manager id is invalid for worker update of order"), ctx)
 		return
 	}
 

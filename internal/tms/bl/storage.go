@@ -33,6 +33,11 @@ type UserStorage interface {
 	UserGetStaffList() ([]DB_GetUser, error)
 	GetUserInfo(userId int64) (DB_GetUser, error)
 	UpdateUserShortName(userId int64, shortName string) error
+
+	UserHolidayCreate(userId int64, authorId int64, date *time.Time) error
+	UserHolidayGet(userId int64, date *time.Time) (*UserHoliday, error)
+	UserHolidayDelete(userId int64, date *time.Time) error
+	UserHolidayListByDate(date time.Time) ([]int64, error)
 }
 
 type Storage interface {
