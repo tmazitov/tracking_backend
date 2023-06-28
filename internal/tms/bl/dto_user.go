@@ -36,3 +36,9 @@ type UserHoliday struct {
 	AuthorId int64
 	Date     *time.Time
 }
+
+type UserJob struct {
+	JobType       uint8  `json:"jobType" binding:"required"`
+	JobExperience uint8  `json:"jobExperience" binding:"gte=0"`
+	JobMail       string `json:"jobMail,omitempty"`
+}

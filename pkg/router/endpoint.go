@@ -1,11 +1,11 @@
 package router
 
-import "github.com/tmazitov/tracking_backend.git/pkg/middleware"
+import "github.com/gin-gonic/gin"
 
 type Endpoint struct {
 	Method     string
 	WS         bool
 	Path       string
-	Middleware middleware.Middleware
+	Middleware []gin.HandlerFunc
 	Handler    Handler
 }

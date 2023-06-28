@@ -34,6 +34,9 @@ type UserStorage interface {
 	GetUserInfo(userId int64) (DB_GetUser, error)
 	UpdateUserShortName(userId int64, shortName string) error
 
+	UserOfferCreate(userId int64, job UserJob) (int, error)
+	UserOfferGet(userId int64) (int, error)
+
 	UserHolidayCreate(userId int64, authorId int64, date *time.Time) error
 	UserHolidayGet(userId int64, date *time.Time) (*UserHoliday, error)
 	UserHolidayDelete(userId int64, date *time.Time) error

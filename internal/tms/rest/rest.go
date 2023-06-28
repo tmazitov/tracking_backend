@@ -48,7 +48,8 @@ func (r *Router) Endpoints() []router.Endpoint {
 
 		{Method: "GET", Path: "/user", Handler: &UserGetHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "PUT", Path: "/user", Handler: &UserPutHandler{Storage: r.storage, Jwt: *r.jwt}},
-
+		{Method: "GET", Path: "/user/offer", Handler: &UserOfferGet{Storage: r.storage, Jwt: r.jwt}},
+		{Method: "POST", Path: "/user/offer", Handler: &UserOfferCreate{Storage: r.storage, Jwt: r.jwt}},
 		{Method: "GET", Path: "/user/:userId/holiday", Handler: &UserHolidayCreateHandler{Storage: r.storage, Jwt: r.jwt}},
 		{Method: "DELETE", Path: "/user/:userId/holiday", Handler: &UserHolidayDeleteHandler{Storage: r.storage, Jwt: r.jwt}},
 		{Method: "GET", Path: "/holiday-list", Handler: &UserHolidayListByDate{Storage: r.storage, Jwt: r.jwt}},

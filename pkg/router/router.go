@@ -9,6 +9,7 @@ import (
 
 type Router struct {
 	engine      *gin.Engine
+	middleware  []gin.HandlerFunc
 	serviceName string
 }
 
@@ -21,7 +22,11 @@ func NewRouter(serviceName string) *Router {
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
 	r.Use(cors.New(config))
 
-	return &Router{engine: r, serviceName: serviceName}
+	return &Router{engine: r, serviceName: serviceName, middleware: []gin.HandlerFunc{}}
+}
+
+func (r *Router) AddMiddleware(middleware []gin.HandlerFunc) {
+	r.engine.Use(middleware...)
 }
 
 func (r *Router) Setup(endpoints []Endpoint) {
@@ -36,11 +41,10 @@ func (r *Router) Setup(endpoints []Endpoint) {
 			prefix = fmt.Sprintf("/%s/api", r.serviceName)
 		}
 
-		if endpoint.Middleware != nil {
-			r.engine.Handle(endpoint.Method, prefix+endpoint.Path, endpoint.Middleware.Handle(), endpoint.Handler.Handle)
-		} else {
-			r.engine.Handle(endpoint.Method, prefix+endpoint.Path, endpoint.Handler.Handle)
-		}
+		var endpointProcess []gin.HandlerFunc = endpoint.Middleware
+		endpointProcess = append(endpointProcess, endpoint.Handler.Handle)
+
+		r.engine.Handle(endpoint.Method, prefix+endpoint.Path, endpointProcess...)
 	}
 }
 
