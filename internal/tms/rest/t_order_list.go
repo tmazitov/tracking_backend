@@ -2,7 +2,6 @@ package rest
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"net/url"
 	"strconv"
@@ -102,7 +101,6 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 				RoleID:    bl.UserRole(order.Worker.RoleID.Int32),
 			}
 			resultOrder.Worker = &worker
-			fmt.Println(order.Worker.ShortName.String)
 		}
 
 		if order.Manager.ID.Valid {
@@ -137,12 +135,11 @@ func fillFiltersByParams(ctx *gin.Context) (bl.R_OrderListFilters, error) {
 		err     error
 	)
 
-	if !params.Has("d") {
-		return filters, errors.New("date is not defined in query")
-	}
-	filters.Date, err = time.Parse("2006-01-02", params.Get("d"))
-	if err != nil {
-		return filters, errors.New("invalid date parameter")
+	if params.Has("d") {
+		filters.Date, err = time.Parse("2006-01-02", params.Get("d"))
+		if err != nil {
+			return filters, errors.New("invalid date parameter")
+		}
 	}
 
 	if params.Has("p") {
@@ -185,6 +182,10 @@ func fillFiltersByParams(ctx *gin.Context) (bl.R_OrderListFilters, error) {
 			}
 			filters.Types = append(filters.Types, bl.OrderType(value))
 		}
+	}
+
+	if params.Has("n") {
+		filters.Title = params.Get("n")
 	}
 
 	if params.Has("is_reg") {

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/lib/pq"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
@@ -99,27 +98,53 @@ func orderListFiltersToString(filters bl.R_OrderListFilters) (string, []interfac
 		filterCounter int = 1
 	)
 
+	if !filters.Date.IsZero() {
+		filterString += fmt.Sprintf("start_at::date=$%d::date", filterCounter)
+		filterItems = append(filterItems, filters.Date.Format("2006-01-02"))
+		filterCounter += 1
+	}
+
 	if filters.WorkerId != 0 {
-		filterString += fmt.Sprintf("AND worker_id = $%d ", filterCounter)
+		if filterCounter > 1 {
+			filterString += " AND "
+		}
+		filterString += fmt.Sprintf("worker_id = $%d ", filterCounter)
 		filterItems = append(filterItems, filters.WorkerId)
 		filterCounter += 1
 	}
 
+	if len(filters.Title) > 0 {
+		if filterCounter > 1 {
+			filterString += " AND "
+		}
+		filterString += fmt.Sprintf("title LIKE $%d ", filterCounter)
+		filterItems = append(filterItems, "%"+filters.Title+"%")
+		filterCounter += 1
+	}
+
 	if len(filters.Statuses) != 0 {
-		fmt.Println(filters.Statuses)
-		filterString += fmt.Sprintf("AND status_id = ANY($%d) ", filterCounter)
+		if filterCounter > 1 {
+			filterString += " AND "
+		}
+		filterString += fmt.Sprintf("status_id = ANY($%d) ", filterCounter)
 		filterItems = append(filterItems, pq.Array(filters.Statuses))
 		filterCounter += 1
 	}
 
 	if len(filters.Types) != 0 {
-		filterString += fmt.Sprintf("AND type_id = ANY($%d) ", filterCounter)
+		if filterCounter > 1 {
+			filterString += " AND "
+		}
+		filterString += fmt.Sprintf("type_id = ANY($%d) ", filterCounter)
 		filterItems = append(filterItems, pq.Array(filters.Types))
 		filterCounter += 1
 	}
 
 	if filters.IsRegularCustomer {
-		filterString += fmt.Sprintf("AND is_regular_customer = $%d ", filterCounter)
+		if filterCounter > 1 {
+			filterString += " AND "
+		}
+		filterString += fmt.Sprintf("is_regular_customer = $%d ", filterCounter)
 		filterItems = append(filterItems, filters.IsRegularCustomer)
 		filterCounter += 1
 	}
@@ -146,8 +171,15 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 
 	filterString, filterItems = orderListFiltersToString(filters)
 	if roleFieldName != "" && roleFieldName != "worker_id" {
-		filterString += fmt.Sprintf("AND %s=$%d", roleFieldName, len(filterItems)+1)
+		if len(filterItems) > 0 {
+			filterString += " AND "
+		}
+		filterString += fmt.Sprintf("%s=$%d", roleFieldName, len(filterItems)+1)
 		filterItems = append(filterItems, userId)
+	}
+
+	if len(filterString) > 0 {
+		filterString = "WHERE " + filterString + " "
 	}
 
 	execString := `SELECT      		
@@ -186,9 +218,7 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 		bill.helper_hours,
 		bill.is_fragile_cargo
 	FROM (
-		SELECT * FROM orders WHERE start_at::date=%s::date ` +
-		filterString +
-		` LIMIT %s OFFSET %s
+		SELECT * FROM orders ` + filterString + `ORDER BY start_at DESC LIMIT $%d OFFSET $%d
 	) orders
 	INNER JOIN points ON points.id=ANY(orders.points_id)
 	INNER JOIN users owner ON owner.id=orders.owner_id
@@ -199,12 +229,9 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 
 	var rowCount uint = bl.DB_OrderListRowCount
 	var filtersLen int = len(filterItems)
-	execString = fmt.Sprintf(execString,
-		"$"+strconv.Itoa(filtersLen+1),
-		"$"+strconv.Itoa(filtersLen+2),
-		"$"+strconv.Itoa(filtersLen+3),
-	)
-	filterItems = append(filterItems, filters.Date.Format("2006-01-02"), rowCount, rowCount*filters.Page)
+	execString = fmt.Sprintf(execString, filtersLen+1, filtersLen+2)
+
+	filterItems = append(filterItems, rowCount, rowCount*filters.Page)
 
 	fmt.Println(execString)
 

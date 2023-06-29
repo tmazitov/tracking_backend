@@ -31,10 +31,11 @@ const (
 	OrderInBetweenCity OrderType = 4
 )
 
-const DB_OrderListRowCount uint = 15
+const DB_OrderListRowCount uint = 24
 
 type R_OrderListFilters struct {
-	Date              time.Time     `json:"date"`
+	Date              time.Time     `json:"date,omitempty"`
+	Title             string        `json:"title,omitempty"`
 	Page              uint          `json:"page,omitempty"`
 	WorkerId          int64         `json:"workerId,omitempty"`
 	Statuses          []OrderStatus `json:"statuses,omitempty"`
