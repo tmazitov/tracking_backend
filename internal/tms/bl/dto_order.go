@@ -151,7 +151,8 @@ type R_OrderBill struct {
 	HelperHours    uint  `json:"helperHours,omitempty"`
 	CarPrice       uint  `json:"carPrice"`
 	CarHours       uint  `json:"carHours"`
-	KM             uint  `json:"km,omitempty"`
+	KmPrice        uint  `json:"kmPrice,omitempty"`
+	KmCount        uint  `json:"kmCount,omitempty"`
 	IsFragileCargo bool  `json:"isFragileCargo,omitempty"`
 	Total          uint  `json:"total"`
 	TotalInFact    uint  `json:"totalInFact,omitempty"`
@@ -164,7 +165,8 @@ type DB_OrderBill struct {
 	HelperHours    sql.NullInt16
 	CarPrice       uint
 	CarHours       uint
-	KM             sql.NullInt16
+	KmCount        sql.NullInt16
+	KmPrice        sql.NullInt16
 	IsFragileCargo bool
 	Total          uint
 	TotalInFact    sql.NullInt32
@@ -237,7 +239,11 @@ func (p *Point) ToEditData() []interface{} {
 	return data
 }
 
-type DefaultPriceItems struct {
-	Name  string `json:"name"`
-	Value uint   `json:"val"`
+type OrderPriceList struct {
+	BigCarPrice  uint `json:"bigCarPrice"`
+	BigCarTime   uint `json:"bigCarTime"`
+	HelperPrice  uint `json:"helperPrice"`
+	HelperTime   uint `json:"helperTime"`
+	FragilePrice uint `json:"fragilePrice"`
+	KM           uint `json:"kmPrice"`
 }

@@ -7,15 +7,13 @@ import (
 	core "github.com/tmazitov/tracking_backend.git/pkg/request"
 )
 
-type OrderDefaultVariables struct {
+type OrderPriceListHandler struct {
 	Storage bl.Storage
 	Jwt     jwt.JwtStorage
-	result  struct {
-		Prices []bl.DefaultPriceItems `json:"prices"`
-	}
+	result  *bl.OrderPriceList
 }
 
-func (h *OrderDefaultVariables) Handle(ctx *gin.Context) {
+func (h *OrderPriceListHandler) Handle(ctx *gin.Context) {
 
 	var (
 		err error
@@ -27,7 +25,7 @@ func (h *OrderDefaultVariables) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if h.result.Prices, err = h.Storage.OrderStorage().OrderDefaultPrices(); err != nil {
+	if h.result, err = h.Storage.OrderStorage().OrderPriceList(); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}

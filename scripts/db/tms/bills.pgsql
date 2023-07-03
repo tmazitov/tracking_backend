@@ -10,7 +10,8 @@ CREATE TABLE order_bills (
 	helper_price 		INT,
 	helper_hours 		INT,
 
-	km 					INT,
+	km_count 			INT,
+	km_price 			INT,
 	price 				INT 	NOT NULL,
 	price_at_fact		INT					DEFAULT NULL,
     is_fragile_cargo 	BOOLEAN NOT NULL 	DEFAULT FALSE,

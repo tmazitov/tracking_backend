@@ -26,11 +26,12 @@ func (s *Storage) OrderBillUpdatePrice(orderId int64, bill bl.R_OrderBill) error
 			helper_price,
 			helper_hours,
 			helper_count,
-			km,
+			km_price,
+			km_count,
 			price,
 			is_fragile_cargo	
 		)
-		VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+		VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 )
 	ON CONFLICT (order_id) DO
 	UPDATE
 		SET 
@@ -40,9 +41,10 @@ func (s *Storage) OrderBillUpdatePrice(orderId int64, bill bl.R_OrderBill) error
 			helper_price = $5,
 			helper_hours = $6,
 			helper_count = $7,
-			km = $8,
-			price = $9,
-			is_fragile_cargo = $10
+			km_price = $8,
+			km_count = $9,
+			price = $10,
+			is_fragile_cargo = $11
 			
 		WHERE order_bills.order_id=$1
 	`
@@ -56,7 +58,8 @@ func (s *Storage) OrderBillUpdatePrice(orderId int64, bill bl.R_OrderBill) error
 		bill.HelperPrice,
 		bill.HelperHours,
 		bill.HelperCount,
-		bill.KM,
+		bill.KmPrice,
+		bill.KmCount,
 		bill.Total,
 		bill.IsFragileCargo,
 	)
@@ -70,7 +73,8 @@ func (s *Storage) OrderBillUpdatePrice(orderId int64, bill bl.R_OrderBill) error
 		bill.HelperPrice,
 		bill.HelperHours,
 		bill.HelperCount,
-		bill.KM,
+		bill.KmPrice,
+		bill.KmCount,
 		bill.Total,
 		bill.IsFragileCargo,
 	).Err()

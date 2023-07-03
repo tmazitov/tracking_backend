@@ -42,6 +42,7 @@ func (r *Router) Endpoints() []router.Endpoint {
 		{Method: "GET", Path: "/offer/:offerId/accept", Handler: &OfferAcceptHandler{Storage: r.storage}},
 		{Method: "GET", Path: "/offer/:offerId/reject", Handler: &OfferRejectHandler{Storage: r.storage}},
 		{Method: "POST", Path: "/staff/remove", Handler: &StaffRemoveHandler{Storage: r.storage}},
+		{Method: "PUT", Path: "/order/price-list", Handler: &OrderPriceListPutHandler{Storage: r.storage}},
 	}
 }
 

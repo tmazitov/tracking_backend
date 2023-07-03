@@ -26,7 +26,7 @@ type OrderStorage interface {
 	PointsDelete(pointsID []int64) error
 	PointsGet(pointsID []int64) ([]Point, error)
 
-	OrderDefaultPrices() ([]DefaultPriceItems, error)
+	OrderPriceList() (*OrderPriceList, error)
 }
 
 type UserStorage interface {

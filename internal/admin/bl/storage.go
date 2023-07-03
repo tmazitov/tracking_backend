@@ -7,6 +7,11 @@ type UserStorage interface {
 	StaffRemove(userId int64) error
 }
 
+type OrderStorage interface {
+	OrderPricelistUpdate(priceList *OrderPriceList) error
+}
+
 type Storage interface {
 	UserStorage() UserStorage
+	OrderStorage() OrderStorage
 }
