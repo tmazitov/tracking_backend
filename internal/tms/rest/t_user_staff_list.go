@@ -27,7 +27,7 @@ func (h *StaffListHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	workersInfo, err := h.Storage.UserStorage().UserGetStaffList()
+	workersInfo, err := h.Storage.UserStorage().UserStaffGetList()
 	if err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return

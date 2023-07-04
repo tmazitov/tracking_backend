@@ -6,7 +6,7 @@ import (
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
 
-func (s *Storage) UserGetStaffList() ([]bl.DB_GetUser, error) {
+func (s *Storage) UserStaffGetList() ([]bl.DB_GetUser, error) {
 	var (
 		staff []bl.DB_GetUser
 		user  bl.DB_GetUser

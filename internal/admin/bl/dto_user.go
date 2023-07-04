@@ -56,3 +56,8 @@ type R_UserOffer struct {
 	JobExperience uint8  `json:"jobExperience"`
 	JobMail       string `json:"jobMail,omitempty"`
 }
+
+type StaffWorkTime struct {
+	StartAt uint16 `json:"startAt" bind:"required"`
+	EndAt   uint16 `json:"endAt" bind:"required"`
+}

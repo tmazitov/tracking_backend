@@ -5,6 +5,7 @@ type UserStorage interface {
 	OfferReject(offerId int) error
 	UserOfferList() ([]DB_UserOffer, error)
 	StaffRemove(userId int64) error
+	StaffWorkTimeUpdate(workTime *StaffWorkTime) error
 }
 
 type OrderStorage interface {

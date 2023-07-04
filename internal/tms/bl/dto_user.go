@@ -42,3 +42,8 @@ type UserJob struct {
 	JobExperience uint8  `json:"jobExperience" binding:"gte=0"`
 	JobMail       string `json:"jobMail,omitempty"`
 }
+
+type StaffWorkTime struct {
+	StartAt uint16 `json:"startAt" bind:"required"`
+	EndAt   uint16 `json:"endAt" bind:"required"`
+}

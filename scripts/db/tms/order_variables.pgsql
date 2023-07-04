@@ -14,4 +14,8 @@ INSERT INTO order_variables ( name, value ) VALUES
 		"helperTime"	:0,
 		"fragilePrice"	:0,
 		"kmPrice"		:0
+	}'),
+	('work_time', '{
+		"startAt" : 0,
+		"endAt" : 1380
 	}');

@@ -55,6 +55,7 @@ func (r *Router) Endpoints() []router.Endpoint {
 		{Method: "GET", Path: "/holiday-list", Handler: &UserHolidayListByDate{Storage: r.storage, Jwt: r.jwt}},
 
 		{Method: "GET", Path: "/staff", Handler: &StaffListHandler{Storage: r.storage, Jwt: *r.jwt}},
+		{Method: "GET", Path: "/staff/work-time", Handler: &StaffWorkTimeHandler{Storage: r.storage, Jwt: *r.jwt}},
 		{Method: "GET", Path: "/order/price-list", Handler: &OrderPriceListHandler{Storage: r.storage, Jwt: *r.jwt}},
 
 		{Method: "GET", Path: "/order/updates", Handler: &ws.WS_OrderListHandler{Hub: r.hub, Storage: r.storage, Jwt: r.jwt}, WS: true},
