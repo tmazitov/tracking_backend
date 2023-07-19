@@ -1,0 +1,1 @@
+docker build -t admin -f ./docker/admin/Dockerfile . 

@@ -1,0 +1,1 @@
+docker build -t tms -f ./docker/tms/Dockerfile . 

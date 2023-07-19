@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/redis/go-redis/v9"
 	config "github.com/tmazitov/tracking_backend.git/config/tms"
 	rest "github.com/tmazitov/tracking_backend.git/internal/tms/rest"
@@ -9,9 +11,15 @@ import (
 	"github.com/tmazitov/tracking_backend.git/pkg/repo"
 )
 
+func configPath() *string {
+	path := flag.String("config", "", "Path to the config.json file")
+	flag.Parse()
+	return path
+}
+
 func main() {
 
-	config := config.Config{Path: "../../config/tms/config.json"}
+	config := config.Config{Path: *configPath()}
 	if err := config.Setup(); err != nil {
 		panic(err)
 	}

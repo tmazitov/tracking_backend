@@ -1,0 +1,53 @@
+version: "2.19"
+services:
+  aaa:
+    container_name: aaa
+    build: 
+      context: "."
+      dockerfile: "./docker/aaa/Dockerfile"
+    ports: 
+      - "5000:5000"
+    # depends_on: 
+    #   - postgres
+
+  admin:
+    container_name: admin
+    build: 
+      context: "."
+      dockerfile: "./docker/admin/Dockerfile"
+    ports: 
+      - "5002:5002"
+    depends_on: 
+      - aaa
+    #   - postgres
+
+  tms:
+    container_name: tms
+    build:
+      context: "."
+      dockerfile: "./docker/tms/Dockerfile"
+    ports: 
+      - "5001:5001"
+    depends_on: 
+      - admin
+    #   - postgres
+
+  # postgres:
+  #   container_name: database
+  #   image: postgres
+  #   environment:
+  #     POSTGRES_DB: "postgres"
+  #     POSTGRES_USER: "postgres"
+  #     POSTGRES_PASSWORD: "postgres"
+  #   ports:
+  #       - "5432:5432"
+
+  # proxy:
+  #   container_name: proxy
+  #   build: "./proxy"
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     - web
+  #   volumes:
+  #     - ./proxy:/app

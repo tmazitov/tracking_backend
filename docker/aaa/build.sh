@@ -1,0 +1,1 @@
+docker build -t aaa -f ./docker/aaa/Dockerfile . 
