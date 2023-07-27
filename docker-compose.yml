@@ -7,8 +7,11 @@ services:
       dockerfile: "./docker/aaa/Dockerfile"
     ports: 
       - "5000:5000"
-    # depends_on: 
-    #   - postgres
+    depends_on: 
+    - database
+    - cache
+    networks:
+    - conn
 
   admin:
     container_name: admin
@@ -16,10 +19,13 @@ services:
       context: "."
       dockerfile: "./docker/admin/Dockerfile"
     ports: 
-      - "5002:5002"
+    - "5002:5002"
     depends_on: 
-      - aaa
-    #   - postgres
+    - aaa
+    - database
+    - cache
+    networks:
+    - conn
 
   tms:
     container_name: tms
@@ -27,21 +33,38 @@ services:
       context: "."
       dockerfile: "./docker/tms/Dockerfile"
     ports: 
-      - "5001:5001"
+    - "5001:5001"
     depends_on: 
-      - admin
-    #   - postgres
+    - admin
+    - database
+    - cache
+    networks:
+    - conn
 
-  # postgres:
-  #   container_name: database
-  #   image: postgres
-  #   environment:
-  #     POSTGRES_DB: "postgres"
-  #     POSTGRES_USER: "postgres"
-  #     POSTGRES_PASSWORD: "postgres"
-  #   ports:
-  #       - "5432:5432"
+  database:
+    container_name: database
+    build:
+      context: "."
+      dockerfile: "./docker/db/Dockerfile"
+    environment:
+      POSTGRES_DB: "tms_o"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "1685"
+    ports:
+    - "5432:5432"
+    networks:
+    - conn
+  
+  cache:
+    container_name: cache
+    image: redis:7.2-rc-alpine
+    ports:
+    - "6379:6379"
+    networks:
+    - conn
 
+networks:
+  conn:
   # proxy:
   #   container_name: proxy
   #   build: "./proxy"
