@@ -1,6 +1,9 @@
 package conductor
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 func (c *Conductor) ValidateCode(ctx context.Context, token string) (CodePayload, error) {
 
@@ -8,7 +11,7 @@ func (c *Conductor) ValidateCode(ctx context.Context, token string) (CodePayload
 
 	claims, err := c.jwt.ValidateCheck(ctx, token)
 	if err != nil {
-		return result, err
+		return result, errors.New("conductor error: " + err.Error())
 	}
 	result = CodePayload{
 		Email: claims.Email,

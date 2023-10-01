@@ -2,6 +2,7 @@ package conductor
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
@@ -18,12 +19,12 @@ func (c *Conductor) checkAuthAttempts(ctx context.Context, email string) (int, e
 	}
 
 	if err != nil {
-		return 0, err
+		return 0, errors.New("conductor error: " + err.Error())
 	}
 
 	attemptCount, err := strconv.Atoi(val)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("conductor error: " + err.Error())
 	}
 
 	// too many attempts

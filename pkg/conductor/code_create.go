@@ -1,6 +1,7 @@
 package conductor
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -17,7 +18,7 @@ func (c *Conductor) CreateCode(ctx *gin.Context, payload CodePayload) (string, e
 	// Check attempt count
 	attemptCount, err := c.checkAuthAttempts(ctx, payload.Email)
 	if err != nil {
-		return "", err
+		return "", errors.New("conductor error: " + err.Error())
 	}
 
 	// Create ticket message
@@ -36,13 +37,13 @@ func (c *Conductor) CreateCode(ctx *gin.Context, payload CodePayload) (string, e
 	})
 
 	if err != nil {
-		return "", err
+		return "", errors.New("conductor error: " + err.Error())
 	}
 
 	// Create ticket record to check its later
 	err = c.redis.Set(ctx, "che:"+token, code, 5*time.Minute).Err()
 	if err != nil {
-		return "", err
+		return "", errors.New("conductor error: " + err.Error())
 	}
 
 	c.updateAuthAttempts(ctx, payload.Email, attemptCount+1)

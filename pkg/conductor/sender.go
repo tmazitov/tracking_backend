@@ -1,6 +1,7 @@
 package conductor
 
 import (
+	"errors"
 	"log"
 
 	"gopkg.in/gomail.v2"
@@ -19,7 +20,7 @@ func (c *Conductor) senderWorker(messageChan chan emailMessage) {
 		select {
 		case m := <-messageChan:
 			if err := c.sendToEmail(m.Email, m.Title, m.HTMLMessage); err != nil {
-				log.Println(err.Error())
+				log.Println(errors.New("conductor error: " + err.Error()))
 			}
 		}
 	}
