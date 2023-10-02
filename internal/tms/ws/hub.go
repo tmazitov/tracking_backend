@@ -121,6 +121,8 @@ func (h *Hub) sendByUserRole(ctx context.Context, message *OrderUpdateMessage, r
 				log.Println("wrong save message to the wait list", err)
 				return err
 			}
+
+			fmt.Printf("client %d : access failed", client.role)
 			continue
 		}
 

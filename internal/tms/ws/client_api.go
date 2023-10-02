@@ -43,18 +43,24 @@ func (c *Client) updateFilters(message *ClientMessage) error {
 		return errBadRequest
 	}
 
-	c.filters = newFilters
+	c.filters = &newFilters
 
 	return nil
 }
 
 func (c *Client) CheckFilters(order *bl.R_Order) bool {
 
+	if c.filters == nil {
+		return true
+	}
+
 	// Check order date
-	filterYear, filterMonth, filterDate := c.filters.Date.Date()
-	orderYear, orderMonth, orderDate := order.StartAt.Date()
-	if filterDate != orderDate || filterMonth != orderMonth || filterYear != orderYear {
-		return false
+	if !c.filters.Date.IsZero() {
+		filterYear, filterMonth, filterDate := c.filters.Date.Date()
+		orderYear, orderMonth, orderDate := order.StartAt.Date()
+		if filterDate != orderDate || filterMonth != orderMonth || filterYear != orderYear {
+			return false
+		}
 	}
 
 	// Check order worker id

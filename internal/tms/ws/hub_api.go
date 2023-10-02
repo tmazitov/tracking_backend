@@ -2,6 +2,7 @@ package ws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
@@ -38,16 +39,19 @@ func (h *Hub) UpdateWorker(ctx context.Context, order *bl.R_Order, result interf
 	var err error
 
 	// Send updates for all admins
+	fmt.Println("update worker : for admins")
 	if err = h.sendByUserRole(ctx, &message, bl.Admin); err != nil {
 		return err
 	}
 
 	// Send updates to the order owner
+	fmt.Println("update worker : for owner")
 	if err = h.sendByUserId(ctx, &message, order.Owner.ID); err != nil {
 		return err
 	}
 
 	// Send order to the selected worker
+	fmt.Println("update worker : for worker")
 	if err = h.sendByUserId(ctx, &messageForWorker, order.Worker.ID); err != nil {
 		return err
 	}

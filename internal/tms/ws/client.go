@@ -17,7 +17,7 @@ type Client struct {
 	role            bl.UserRole
 	isRefreshNeeded bool
 	isAuthorized    bool
-	filters         bl.R_OrderListFilters
+	filters         *bl.R_OrderListFilters
 	conn            *websocket.Conn
 	send            chan []byte
 	access          string
@@ -30,6 +30,7 @@ func NewClient(conn *websocket.Conn, redis *redis.Client) *Client {
 		send:         make(chan []byte, 256),
 		isAuthorized: false,
 		waitList:     NewWaitList(redis),
+		filters:      nil,
 	}
 }
 
@@ -133,7 +134,7 @@ func (c *Client) writePump(jwt *jwt.JwtStorage) {
 			return
 		}
 
-		fmt.Printf("user id: %d -- authorized: %t	message:%s \n\tfilters: %s \n", c.userId, c.isAuthorized, string(message), c.filters.Date.String())
+		fmt.Printf("user id: %d -- authorized: %t	message:%s \n\t", c.userId, c.isAuthorized, string(message))
 
 		err := c.conn.WriteMessage(websocket.TextMessage, message)
 		if err != nil {
