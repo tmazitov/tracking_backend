@@ -2,7 +2,6 @@ package rest
 
 import (
 	"errors"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
@@ -81,45 +80,7 @@ func (h *OrderCreateHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	var (
-		startAt time.Time = order.StartAt.Time
-		endAt   time.Time = order.EndAt.Time
-	)
-
-	h.result = bl.R_Order{
-		ID:                order.ID,
-		Title:             order.Title,
-		StartAt:           &startAt,
-		EndAt:             &endAt,
-		StartAtFact:       nil,
-		EndAtFact:         nil,
-		StatusID:          order.StatusID,
-		Points:            order.Points,
-		Comment:           order.Comment.String,
-		IsRegularCustomer: order.IsRegularCustomer,
-		Price: &bl.R_OrderBill{
-			CarTypeID:      order.Bill.CarTypeID,
-			HelperCount:    uint(order.Bill.HelperCount.Int16),
-			HelperHours:    uint(order.Bill.HelperHours.Int16),
-			IsFragileCargo: order.Bill.IsFragileCargo,
-		},
-	}
-
-	owner := bl.R_GetUser{
-		ID:        order.Owner.ID.Int64,
-		ShortName: order.Owner.ShortName.String,
-		RoleID:    bl.UserRole(order.Owner.RoleID.Int32),
-	}
-	h.result.Owner = &owner
-
-	if order.Manager.ID.Valid {
-		var manager bl.R_GetUser = bl.R_GetUser{
-			ID:        order.Manager.ID.Int64,
-			ShortName: order.Manager.ShortName.String,
-			RoleID:    bl.UserRole(order.Manager.RoleID.Int32),
-		}
-		h.result.Manager = &manager
-	}
+	h.result = *order.ToReal()
 
 	core.SendResponse(201, h.result, ctx)
 }

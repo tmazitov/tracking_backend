@@ -65,11 +65,8 @@ func (s *Storage) CreateOrder(order bl.CreateOrder, role bl.UserRole) (int64, er
 		queryFieldsString      string
 		queryFieldsValues      []interface{}
 	)
-	fmt.Println(order.OrderType)
 	queryFieldsString, queryFieldsSpotsString, queryFieldsValues = getQueryItems(role, order, pointsID)
-	fmt.Println(queryFieldsString)
-	fmt.Println(queryFieldsSpotsString)
-	fmt.Println(queryFieldsValues...)
+
 	queryString = fmt.Sprintf(`INSERT INTO orders ( %s ) 
 	VALUES ( %s )
 	RETURNING id`, queryFieldsString, queryFieldsSpotsString)

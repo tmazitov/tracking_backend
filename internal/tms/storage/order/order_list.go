@@ -233,7 +233,5 @@ func (s *Storage) orderList(userId int64, roleFieldName string, filters bl.R_Ord
 
 	filterItems = append(filterItems, rowCount, rowCount*filters.Page)
 
-	fmt.Println(execString)
-
 	return conn.Query(execString, filterItems...)
 }

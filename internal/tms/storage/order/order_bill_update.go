@@ -2,7 +2,6 @@ package order
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/tmazitov/tracking_backend.git/internal/tms/bl"
 )
@@ -48,21 +47,6 @@ func (s *Storage) OrderBillUpdatePrice(orderId int64, bill bl.R_OrderBill) error
 			
 		WHERE order_bills.order_id=$1
 	`
-
-	fmt.Println(
-		execString,
-		orderId,
-		bill.CarTypeID,
-		bill.CarPrice,
-		bill.CarHours,
-		bill.HelperPrice,
-		bill.HelperHours,
-		bill.HelperCount,
-		bill.KmPrice,
-		bill.KmCount,
-		bill.Total,
-		bill.IsFragileCargo,
-	)
 
 	return conn.QueryRow(
 		execString,

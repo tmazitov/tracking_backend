@@ -12,9 +12,10 @@ import (
 )
 
 type OrderPutHandler struct {
-	Storage bl.Storage
-	Jwt     jwt.JwtStorage
-	input   bl.R_EditableOrder
+	Storage  bl.Storage
+	Jwt      jwt.JwtStorage
+	input    bl.R_EditableOrder
+	response bl.R_Order
 }
 
 func (h *OrderPutHandler) Handle(ctx *gin.Context) {
@@ -25,6 +26,8 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		updatedOrderPointsID []int64
 		originalPointsID     []int64
 		orderId              int64
+		updatedOrderRaw      *bl.DB_Order
+		updateOrder          bl.DB_EditableOrder
 		err                  error
 	)
 
@@ -34,18 +37,8 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if userPayload.RoleId == int(bl.Worker) {
-		core.ErrorLog(403, "Forbidden", errors.New("worker can not to create the order"), ctx)
-		return
-	}
-
-	if err := ctx.BindJSON(&h.input); err != nil {
-		core.ErrorLog(400, "Bad request", err, ctx)
-		return
-	}
-
-	if len(h.input.Points) < 2 || len(h.input.Points) > 100 {
-		core.ErrorLog(400, "Bad request", errors.New("count of points is not valid"), ctx)
+	if userPayload.RoleId != int(bl.Manager) && userPayload.RoleId != int(bl.Admin) {
+		core.ErrorLog(403, "Forbidden", errors.New("no access to edit order"), ctx)
 		return
 	}
 
@@ -61,8 +54,19 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
+
 	if int64(userPayload.UserId) != orderOwnerId {
-		core.ErrorLog(403, "Forbidden", errors.New("invalid user id to update order"), ctx)
+		core.ErrorLog(403, "Forbidden", errors.New("no access to edit order"), ctx)
+		return
+	}
+
+	if err := ctx.BindJSON(&h.input); err != nil {
+		core.ErrorLog(400, "Bad request", err, ctx)
+		return
+	}
+
+	if len(h.input.Points) < 2 || len(h.input.Points) > 100 {
+		core.ErrorLog(400, "Bad request", errors.New("count of points is not valid"), ctx)
 		return
 	}
 
@@ -73,7 +77,7 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		return
 	}
 	if orderStatus == bl.OrderCanceled || orderStatus == bl.OrderDone {
-		core.ErrorLog(403, "Forbidden", errors.New("invalid user id to update order"), ctx)
+		core.ErrorLog(400, "Forbidden", errors.New("impossible to change the order with this status"), ctx)
 		return
 	}
 
@@ -89,20 +93,34 @@ func (h *OrderPutHandler) Handle(ctx *gin.Context) {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
+	updateOrder = bl.DB_EditableOrder{
+		StartAt:           h.input.StartAt,
+		EndAt:             h.input.EndAt,
+		Title:             h.input.Title,
+		PointsID:          updatedOrderPointsID,
+		OrderType:         h.input.OrderType,
+		Comment:           h.input.Comment,
+		IsRegularCustomer: h.input.IsRegularCustomer,
+	}
 
-	// Update the points ID in the order record
-	if err = h.Storage.OrderStorage().OrderUpdate(orderId, bl.DB_EditableOrder{
-		StartAt:        h.input.StartAt,
-		PointsID:       updatedOrderPointsID,
-		Helpers:        h.input.Helpers,
-		Comment:        h.input.Comment,
-		IsFragileCargo: h.input.IsFragileCargo,
-	}); err != nil {
+	if err = h.Storage.OrderStorage().OrderUpdate(orderId, updateOrder); err != nil {
 		core.ErrorLog(500, "Internal server error", err, ctx)
 		return
 	}
 
-	core.SendResponse(200, nil, ctx)
+	if err = h.Storage.OrderStorage().OrderBillUpdatePrice(orderId, *h.input.Price); err != nil {
+		core.ErrorLog(500, "Internal server error", err, ctx)
+		return
+	}
+
+	if updatedOrderRaw, err = h.Storage.OrderStorage().OrderGet(orderId); err != nil {
+		core.ErrorLog(500, "Internal server error", err, ctx)
+		return
+	}
+
+	h.response = *updatedOrderRaw.ToReal()
+
+	core.SendResponse(200, h.response, ctx)
 }
 
 func (h *OrderPutHandler) updatePoints(orderID int64, originalPointsID []int64, newPointsData []bl.Point) ([]int64, error) {
@@ -117,7 +135,7 @@ func (h *OrderPutHandler) updatePoints(orderID int64, originalPointsID []int64, 
 	)
 
 	// Find the new points which we need to create or update
-	// !!! : all points with the extra ids is will be ignored
+	// !!! : all points with the extra ids will be ignored
 	for _, point := range newPointsData {
 		idIsFound = false
 
@@ -154,10 +172,6 @@ func (h *OrderPutHandler) updatePoints(orderID int64, originalPointsID []int64, 
 			pointsToDelete = append(pointsToDelete, originalPointId)
 		}
 	}
-
-	// fmt.Println("points to create: ", pointsToCreate)
-	// fmt.Println("points to update: ", pointsToUpdate)
-	// fmt.Println("points to delete: ", pointsToDelete)
 
 	if len(pointsToUpdate) > 0 {
 		if updatedOrderPointsID, err = h.Storage.OrderStorage().PointsUpdate(pointsToUpdate); err != nil {

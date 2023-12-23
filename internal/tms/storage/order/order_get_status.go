@@ -19,7 +19,7 @@ func (s *Storage) OrderGetStatus(orderId int64) (bl.OrderStatus, error) {
 	}
 	defer s.repo.Close()
 
-	execString = `SELECT points_id FROM orders WHERE id=$1`
+	execString = `SELECT status_id FROM orders WHERE id=$1`
 
 	if err = conn.QueryRow(execString, orderId).Scan(&orderStatus); err != nil {
 		return -1, errors.New("DB exec error: " + err.Error())

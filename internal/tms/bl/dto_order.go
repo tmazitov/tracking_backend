@@ -2,6 +2,7 @@ package bl
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -52,11 +53,10 @@ type R_Order struct {
 	EndAtFact         *time.Time   `json:"endAtFact,omitempty"`
 	StatusID          int          `json:"statusId"`
 	Points            []Point      `json:"points"`
-	OrderType         uint8        `json:"orderType,omitempty"`
-	Owner             *R_GetUser   `json:"owner,omitempty"`
+	OrderType         int          `json:"orderType"`
+	Owner             *R_GetUser   `json:"owner"`
 	Worker            *R_GetUser   `json:"worker,omitempty"`
 	Manager           *R_GetUser   `json:"manager,omitempty"`
-	Helpers           uint8        `json:"helpers,omitempty"`
 	Comment           string       `json:"comment,omitempty"`
 	IsFragileCargo    bool         `json:"isFragileCargo,omitempty"`
 	IsRegularCustomer bool         `json:"isRegularCustomer,omitempty"`
@@ -72,7 +72,7 @@ type DB_Order struct {
 	EndAt             sql.NullTime
 	EndAtFact         sql.NullTime
 	StatusID          int
-	OrderType         uint8
+	OrderType         int
 	Points            []Point
 	Owner             DB_GetUser
 	Worker            DB_GetUser
@@ -82,29 +82,56 @@ type DB_Order struct {
 	IsRegularCustomer bool
 }
 
+func PrintROrder(order *R_Order) {
+	fmt.Printf("ID: %d\n", order.ID)
+	fmt.Printf("Title: %s\n", order.Title)
+	fmt.Printf("StartAt: %v\n", order.StartAt)
+	fmt.Printf("StartAtFact: %v\n", order.StartAtFact)
+	fmt.Printf("EndAt: %v\n", order.EndAt)
+	fmt.Printf("EndAtFact: %v\n", order.EndAtFact)
+	fmt.Printf("StatusID: %d\n", order.StatusID)
+	fmt.Printf("Points: %v\n", order.Points)
+	fmt.Printf("OrderType: %d\n", order.OrderType)
+	fmt.Printf("Owner: %+v\n", order.Owner)
+	fmt.Printf("Worker: %+v\n", order.Worker)
+	fmt.Printf("Manager: %+v\n", order.Manager)
+	fmt.Printf("Comment: %s\n", order.Comment)
+	fmt.Printf("IsFragileCargo: %t\n", order.IsFragileCargo)
+	fmt.Printf("IsRegularCustomer: %t\n", order.IsRegularCustomer)
+	fmt.Printf("Price: %+v\n", order.Price)
+}
+
 func (o *DB_Order) ToReal() *R_Order {
 	var (
 		startAt time.Time = o.StartAt.Time
 		endAt   time.Time = o.EndAt.Time
+		order   R_Order   = R_Order{
+			ID:                o.ID,
+			Title:             o.Title,
+			StartAt:           &startAt,
+			EndAt:             &endAt,
+			StartAtFact:       nil,
+			EndAtFact:         nil,
+			StatusID:          o.StatusID,
+			Points:            o.Points,
+			Comment:           o.Comment.String,
+			OrderType:         o.OrderType,
+			IsRegularCustomer: o.IsRegularCustomer,
+			Price: &R_OrderBill{
+				CarTypeID:      o.Bill.CarTypeID,
+				CarPrice:       o.Bill.CarPrice,
+				CarHours:       o.Bill.CarHours,
+				HelperCount:    uint(o.Bill.HelperCount.Int16),
+				HelperHours:    uint(o.Bill.HelperHours.Int16),
+				HelperPrice:    uint(o.Bill.HelperPrice.Int16),
+				KmCount:        uint(o.Bill.KmCount.Int16),
+				KmPrice:        uint(o.Bill.KmPrice.Int16),
+				IsFragileCargo: o.Bill.IsFragileCargo,
+				Total:          o.Bill.Total,
+				TotalInFact:    uint(o.Bill.TotalInFact.Int32),
+			},
+		}
 	)
-	var order R_Order = R_Order{
-		ID:                o.ID,
-		Title:             o.Title,
-		StartAt:           &startAt,
-		EndAt:             &endAt,
-		StartAtFact:       nil,
-		EndAtFact:         nil,
-		StatusID:          o.StatusID,
-		Points:            o.Points,
-		Comment:           o.Comment.String,
-		IsRegularCustomer: o.IsRegularCustomer,
-		Price: &R_OrderBill{
-			CarTypeID:      o.Bill.CarTypeID,
-			HelperCount:    uint(o.Bill.HelperCount.Int16),
-			HelperHours:    uint(o.Bill.HelperHours.Int16),
-			IsFragileCargo: o.Bill.IsFragileCargo,
-		},
-	}
 
 	owner := R_GetUser{
 		ID:        o.Owner.ID.Int64,
@@ -199,23 +226,24 @@ type CreateOrder struct {
 }
 
 type R_EditableOrder struct {
-	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
-	Points            []Point   `json:"points"  binding:"required" validate:"dive"`
-	Title             string    `json:"title,omitempty"   validate:"max=64"`
-	WorkerID          int64     `json:"workerId,omitempty"`
-	Helpers           uint8     `json:"helpers,omitempty"`
-	OrderType         uint8     `json:"orderType,omitempty"`
-	Comment           string    `json:"comment,omitempty" validate:"max=256"`
-	IsFragileCargo    bool      `json:"isFragileCargo,omitempty"`
-	IsRegularCustomer bool      `json:"isRegularCustomer,omitempty"`
+	StartAt           time.Time    `json:"startAt" binding:"required" validate:"max=32"`
+	EndAt             time.Time    `json:"endAt" binding:"required" validate:"max=32"`
+	Points            []Point      `json:"points"  binding:"required" validate:"dive"`
+	Title             string       `json:"title,omitempty"   validate:"max=64"`
+	OrderType         uint8        `json:"orderType,omitempty"`
+	Comment           string       `json:"comment,omitempty" validate:"max=256"`
+	IsRegularCustomer bool         `json:"isRegularCustomer,omitempty"`
+	Price             *R_OrderBill `json:"price"`
 }
 
 type DB_EditableOrder struct {
-	StartAt        time.Time `json:"startAt" validate:"max=32"`
-	PointsID       []int64   `json:"points"`
-	Helpers        uint8     `json:"helpers"`
-	Comment        string    `json:"comment,omitempty" validate:"max=256"`
-	IsFragileCargo bool      `json:"isFragileCargo,omitempty"`
+	StartAt           time.Time `json:"startAt" binding:"required" validate:"max=32"`
+	EndAt             time.Time `json:"endAt" binding:"required" validate:"max=32"`
+	PointsID          []int64
+	Title             string `json:"title,omitempty"   validate:"max=64"`
+	OrderType         uint8  `json:"orderType,omitempty"`
+	Comment           string `json:"comment,omitempty" validate:"max=256"`
+	IsRegularCustomer bool   `json:"isRegularCustomer,omitempty"`
 }
 
 type Point struct {

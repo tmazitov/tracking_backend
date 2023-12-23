@@ -21,14 +21,25 @@ func (s *Storage) OrderUpdate(orderId int64, info bl.DB_EditableOrder) error {
 	execString := `
 	UPDATE orders SET 
 		start_at=$2,
-		helpers=$3,
-		points_id=$4,
+		end_at=$3,
+		title=$4,
 		comment_message=$5,
-		is_fragile_cargo=$6,
+		points_id=$6,
+		type_id=$7,
+		is_regular_customer=$8,
 		edited_at=now()
 	WHERE id=$1 `
 
-	if err = conn.QueryRow(execString, orderId, info.StartAt, info.Helpers, pq.Int64Array(info.PointsID), info.Comment, info.IsFragileCargo).Err(); err != nil {
+	if err = conn.QueryRow(execString,
+		orderId,
+		info.StartAt,
+		info.EndAt,
+		info.Title,
+		info.Comment,
+		pq.Int64Array(info.PointsID),
+		info.OrderType,
+		info.IsRegularCustomer,
+	).Err(); err != nil {
 		return errors.New("DB exec error: " + err.Error())
 	}
 

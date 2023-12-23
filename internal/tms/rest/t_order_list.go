@@ -53,77 +53,8 @@ func getOrderList(userId int64, roleId int, filters bl.R_OrderListFilters, stora
 		return result, err
 	}
 
-	var resultOrder bl.R_Order
-
 	for _, order := range orders {
-
-		var (
-			startAt time.Time = order.StartAt.Time
-			endAt   time.Time = order.EndAt.Time
-		)
-
-		resultOrder = bl.R_Order{
-			ID:                order.ID,
-			Title:             order.Title,
-			StartAt:           &startAt,
-			EndAt:             &endAt,
-			StartAtFact:       nil,
-			EndAtFact:         nil,
-			StatusID:          order.StatusID,
-			Points:            order.Points,
-			Comment:           order.Comment.String,
-			IsRegularCustomer: order.IsRegularCustomer,
-			Price: &bl.R_OrderBill{
-				CarTypeID:      order.Bill.CarTypeID,
-				CarPrice:       order.Bill.CarPrice,
-				CarHours:       order.Bill.CarHours,
-				HelperCount:    uint(order.Bill.HelperCount.Int16),
-				HelperHours:    uint(order.Bill.HelperHours.Int16),
-				HelperPrice:    uint(order.Bill.HelperPrice.Int16),
-				KmCount:        uint(order.Bill.KmCount.Int16),
-				KmPrice:        uint(order.Bill.KmPrice.Int16),
-				IsFragileCargo: order.Bill.IsFragileCargo,
-				Total:          order.Bill.Total,
-				TotalInFact:    uint(order.Bill.TotalInFact.Int32),
-			},
-		}
-
-		owner := bl.R_GetUser{
-			ID:        order.Owner.ID.Int64,
-			ShortName: order.Owner.ShortName.String,
-			RoleID:    bl.UserRole(order.Owner.RoleID.Int32),
-		}
-		resultOrder.Owner = &owner
-
-		if order.Worker.ID.Valid {
-			var worker bl.R_GetUser = bl.R_GetUser{
-				ID:        order.Worker.ID.Int64,
-				ShortName: order.Worker.ShortName.String,
-				RoleID:    bl.UserRole(order.Worker.RoleID.Int32),
-			}
-			resultOrder.Worker = &worker
-		}
-
-		if order.Manager.ID.Valid {
-			var manager bl.R_GetUser = bl.R_GetUser{
-				ID:        order.Manager.ID.Int64,
-				ShortName: order.Manager.ShortName.String,
-				RoleID:    bl.UserRole(order.Manager.RoleID.Int32),
-			}
-			resultOrder.Manager = &manager
-		}
-
-		if order.StartAtFact.Valid && !order.StartAtFact.Time.IsZero() {
-			var endAtFact time.Time = order.StartAtFact.Time
-			resultOrder.StartAtFact = &endAtFact
-		}
-
-		if order.EndAtFact.Valid && !order.EndAtFact.Time.IsZero() {
-			var startAtFact time.Time = order.EndAtFact.Time
-			resultOrder.EndAtFact = &startAtFact
-		}
-
-		result = append(result, resultOrder)
+		result = append(result, *order.ToReal())
 	}
 
 	return result, err

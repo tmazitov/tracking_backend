@@ -21,9 +21,8 @@ func (s *Storage) OrderGetPointsID(orderId int64) ([]int64, error) {
 	defer s.repo.Close()
 
 	execString = `SELECT points_id FROM orders WHERE id=$1`
-
 	if err = conn.QueryRow(execString, orderId).Scan(&pointsID); err != nil {
 		return nil, errors.New("DB exec error: " + err.Error())
 	}
-	return pointsID, err
+	return []int64(pointsID), err
 }
